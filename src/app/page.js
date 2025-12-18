@@ -1,5 +1,5 @@
 'use client';
-
+import { client } from '@/sanity/lib/client'; // (Check path matches your file)
 import { useCallback, useState, useEffect, useRef } from 'react';
 import { Flame, Snowflake, Volume2, Droplets, Wrench, AlertTriangle, Star } from 'lucide-react';
 
@@ -36,35 +36,12 @@ const IMAGES = {
 };
 
 // SAMPLE REVIEWS DATA
-const SAMPLE_REVIEWS = [
-  {
-    id: 1,
-    author: 'Sarah M.',
-    text: "They didn't try to sell me a new furnace. Fixed a $20 part and left. Honest guys.",
-    date: '2 days ago',
-  },
-  {
-    id: 2,
-    author: 'David K.',
-    text: 'Woke up to no heat at 3am. Tech was here by 4:15am. Incredible service.',
-    date: '1 week ago',
-  },
-  {
-    id: 3,
-    author: 'Priya R.',
-    text: 'Love the digital quote system. No surprises. The tech was super polite too.',
-    date: '2 weeks ago',
-  },
-  {
-    id: 4,
-    author: 'Mark T.',
-    text: 'My A/C died during the heatwave. They were the only ones who picked up. Lifesavers.',
-    date: 'Last month',
-  },
-];
+const SAMPLE_REVIEWS = [];
 
 // --- INTERNAL COMPONENT: Draggable Review Carousel (FIXED LAYOUT) ---
 function ReviewCarousel() {
+  // --- STATE ---
+  const [reviews, setReviews] = useState([]); // Stores the real data from Sanity
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
@@ -72,14 +49,48 @@ function ReviewCarousel() {
 
   const containerRef = useRef(null);
 
+  // --- FETCH REVIEWS FROM SANITY ---
+  useEffect(() => {
+    const fetchReviews = async () => {
+      try {
+        const data = await client.fetch(`*[_type == "review"]{
+          "id": _id,
+          author,
+          stars,
+          text,
+          date
+        }`);
+        setReviews(data);
+      } catch (error) {
+        console.error('Failed to fetch reviews:', error);
+      }
+    };
+
+    fetchReviews();
+  }, []);
+
+  // Use real reviews if we have them, otherwise show a "Loading" placeholder
+  const activeReviews =
+    reviews.length > 0
+      ? reviews
+      : [
+          {
+            id: 'loading',
+            text: 'Loading latest reviews...',
+            author: 'GTA Home Comfort',
+            stars: 5,
+            date: '...',
+          },
+        ];
+
   // --- AUTO PLAY LOGIC ---
   useEffect(() => {
     if (isDragging) return;
     const interval = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % SAMPLE_REVIEWS.length);
+      setCurrentIndex((prev) => (prev + 1) % activeReviews.length);
     }, 6000);
     return () => clearInterval(interval);
-  }, [isDragging]);
+  }, [isDragging, activeReviews.length]);
 
   // --- DRAG HANDLERS ---
   const onPointerDown = (e) => {
@@ -103,16 +114,15 @@ function ReviewCarousel() {
     const threshold = 20;
 
     if (currentTranslate < -threshold) {
-      setCurrentIndex((prev) => (prev + 1) % SAMPLE_REVIEWS.length);
+      setCurrentIndex((prev) => (prev + 1) % activeReviews.length);
     } else if (currentTranslate > threshold) {
-      setCurrentIndex((prev) => (prev === 0 ? SAMPLE_REVIEWS.length - 1 : prev - 1));
+      setCurrentIndex((prev) => (prev === 0 ? activeReviews.length - 1 : prev - 1));
     }
     setCurrentTranslate(0);
   };
 
   return (
     <div
-      // FIX 1: Reduced padding from p-6 to p-5 to gain vertical space
       className='w-full h-full p-5 rounded-[32px] bg-white/40 border border-rose-100/50 backdrop-blur-sm flex flex-col justify-between group hover:bg-white/60 transition-all shadow-sm hover:shadow-md cursor-grab active:cursor-grabbing overflow-hidden relative select-none'
       onMouseDown={onPointerDown}
       onMouseMove={onPointerMove}
@@ -130,7 +140,6 @@ function ReviewCarousel() {
       </div>
 
       {/* TRACK CONTAINER */}
-      {/* FIX 2: Reduced mt-8 to mt-6 */}
       <div className='flex-1 relative mt-6 overflow-hidden'>
         <div
           ref={containerRef}
@@ -139,28 +148,23 @@ function ReviewCarousel() {
             transform: `translateX(calc(-${currentIndex * 100}% + ${currentTranslate}%))`,
           }}
         >
-          {SAMPLE_REVIEWS.map((review) => (
-            <div
-              key={review.id}
-              // FIX 3: Changed justify-center to justify-end (or between) and reduced pb-8 to pb-6
-              className='min-w-full h-full flex flex-col justify-end px-1 pb-6'
-            >
+          {activeReviews.map((review) => (
+            <div key={review.id} className='min-w-full h-full flex flex-col justify-end px-1 pb-6'>
               <div className='mb-auto pt-2'>
                 <div className='flex gap-0.5 mb-2'>
-                  {[1, 2, 3, 4, 5].map((i) => (
+                  {[...Array(review.stars || 5)].map((_, i) => (
                     <Star
                       key={i}
                       className='w-4 h-4 text-orange-400 fill-orange-400 drop-shadow-sm'
                     />
                   ))}
                 </div>
-                {/* FIX 4: Changed line-clamp-3 to line-clamp-2 to prevent overflow clipping */}
                 <p className='text-rose-950/90 italic font-medium leading-relaxed line-clamp-2 select-none pointer-events-none'>
                   "{review.text}"
                 </p>
               </div>
 
-              {/* Metadata inside the slide */}
+              {/* Metadata */}
               <div className='mt-2 pointer-events-none'>
                 <div className='text-xs font-bold text-rose-400 uppercase tracking-wider truncate'>
                   {review.author}
@@ -180,7 +184,7 @@ function ReviewCarousel() {
           Drag to slide
         </div>
         <div className='flex gap-1.5'>
-          {SAMPLE_REVIEWS.map((_, idx) => (
+          {activeReviews.map((_, idx) => (
             <div
               key={idx}
               className={`h-1.5 rounded-full transition-all duration-300 ${
@@ -193,7 +197,6 @@ function ReviewCarousel() {
     </div>
   );
 }
-
 export default function Home() {
   const [currentView, setCurrentView] = useState(VIEW.GRID);
   const [selectedIssue, setSelectedIssue] = useState(null);

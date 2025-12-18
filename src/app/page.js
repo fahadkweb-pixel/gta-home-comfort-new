@@ -1,7 +1,16 @@
 'use client';
 import { client } from '@/sanity/lib/client'; // (Check path matches your file)
 import { useCallback, useState, useEffect, useRef } from 'react';
-import { Flame, Snowflake, Volume2, Droplets, Wrench, AlertTriangle, Star } from 'lucide-react';
+import {
+  Flame,
+  Snowflake,
+  Volume2,
+  Droplets,
+  Wrench,
+  AlertTriangle,
+  Star,
+  ArrowRight,
+} from 'lucide-react';
 
 // COMPONENTS
 import ControlTile from './components/ControlTile';

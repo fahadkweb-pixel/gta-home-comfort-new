@@ -197,133 +197,119 @@ function ReviewCarousel() {
     </div>
   );
 }
+// Map Sanity strings to your Lucide components
+const ICON_MAP = {
+  Flame: Flame,
+  Snowflake: Snowflake,
+  Volume2: Volume2, // Matches "No Heat/Noise" usually
+  Droplets: Droplets,
+  Wrench: Wrench, // Matches "Maintenance"
+  AlertTriangle: AlertTriangle, // Matches "Emergency"
+  Star: Star,
+  Default: ArrowRight,
+};
+
 export default function Home() {
-  const [currentView, setCurrentView] = useState(VIEW.GRID);
-  const [selectedIssue, setSelectedIssue] = useState(null);
+  const [tiles, setTiles] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const handleIssueSelect = useCallback((issue) => {
-    setSelectedIssue(issue);
-    setCurrentView(VIEW.QUOTE);
-  }, []);
-
-  const goToGrid = useCallback(() => {
-    setSelectedIssue(null);
-    setCurrentView(VIEW.GRID);
+  useEffect(() => {
+    const fetchTiles = async () => {
+      try {
+        const data = await client.fetch(`*[_type == "homepage"][0]{ heroTiles }`);
+        if (data?.heroTiles) setTiles(data.heroTiles);
+      } catch (error) {
+        console.error('Failed to fetch tiles:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchTiles();
   }, []);
 
   return (
-    <main className='relative min-h-[calc(100vh-80px)] w-full overflow-x-hidden'>
-      {/* Background Ambience */}
-      <div className='absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-rose-400/10 rounded-full blur-[120px] pointer-events-none' />
-
-      <div className='container mx-auto px-4 pb-12 pt-6 md:pt-12 max-w-5xl'>
-        {/* VIEW: BENTO GRID DASHBOARD */}
-        {currentView === VIEW.GRID && (
-          <div className='animate-in fade-in slide-in-from-bottom-8 duration-700'>
-            {/* 1. HEADER */}
-            <div className='text-center mb-10 md:mb-12 space-y-4'>
-              <h1 className='text-4xl md:text-7xl font-bold text-rose-950 tracking-tighter'>
-                Servicing your home, <br></br>
-                <span className='text-transparent bg-clip-text bg-gradient-to-r from-rose-500 to-orange-500'>
-                  the GTA way.
-                </span>
-              </h1>
-
-              <p className='text-lg md:text-xl text-rose-900/60 max-w-2xl mx-auto leading-relaxed'>
-                Select an issue below to start your service request. We'll diagnose the problem and
-                get a technician to your door.
-              </p>
+    <main className='min-h-screen bg-[#FDF8F6] text-rose-950 selection:bg-rose-200'>
+      <div className='max-w-md mx-auto min-h-screen flex flex-col relative bg-white sm:shadow-2xl sm:shadow-rose-100/50 overflow-hidden'>
+        {/* HEADER */}
+        <header className='px-6 pt-12 pb-6 flex justify-between items-start z-10 relative'>
+          <div>
+            <div className='flex items-center gap-2 mb-2'>
+              <div className='w-8 h-8 rounded-full bg-rose-500 flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-rose-200'>
+                <Flame size={16} fill='white' />
+              </div>
+              <span className='text-xs font-bold tracking-widest text-rose-400 uppercase'>
+                GTA Home Comfort
+              </span>
             </div>
-
-            {/* 2. THE BENTO GRID */}
-            <div className='w-full grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 auto-rows-[160px] md:auto-rows-[180px]'>
-              {/* PRIMARY: No Heat (2x2) */}
-              <div className='col-span-2 row-span-2'>
-                <ControlTile
-                  variant='primary'
-                  icon={<Flame />}
-                  label='Emergency: No Heat'
-                  sub='Furnace / Boiler / Heat Pump'
-                  imageSrc={IMAGES.HEAT}
-                  onClick={() => handleIssueSelect(ISSUE.NO_HEAT)}
-                />
-              </div>
-
-              {/* No Cooling */}
-              <div className='col-span-1 row-span-1'>
-                <ControlTile
-                  icon={<Snowflake />}
-                  label='No Cooling'
-                  sub='A/C Failure'
-                  imageSrc={IMAGES.COOL}
-                  onClick={() => handleIssueSelect(ISSUE.NO_COOL)}
-                />
-              </div>
-
-              {/* Water Leak */}
-              <div className='col-span-1 row-span-1'>
-                <ControlTile
-                  icon={<Droplets />}
-                  label='Water Leak'
-                  sub='Active Leaks'
-                  imageSrc={IMAGES.WATER}
-                  onClick={() => handleIssueSelect(ISSUE.LEAK)}
-                />
-              </div>
-
-              {/* Maintenance (Wide) */}
-              <div className='col-span-2 row-span-1'>
-                <ControlTile
-                  variant='warning'
-                  icon={<Wrench />}
-                  label='System Maintenance'
-                  sub='Schedule Tune-up'
-                  imageSrc={IMAGES.TOOLS}
-                  onClick={() => handleIssueSelect(ISSUE.MAINTENANCE)}
-                />
-              </div>
-
-              {/* Noise */}
-              <div className='col-span-1 row-span-1'>
-                <ControlTile
-                  icon={<Volume2 />}
-                  label='Noise'
-                  sub='Clunking / Whirring'
-                  imageSrc={IMAGES.NOISE}
-                  onClick={() => handleIssueSelect(ISSUE.NOISE)}
-                />
-              </div>
-
-              {/* Other */}
-              <div className='col-span-1 row-span-1'>
-                <ControlTile
-                  icon={<AlertTriangle />}
-                  label='Other Issue'
-                  sub='General Inquiry'
-                  imageSrc={IMAGES.OTHER}
-                  onClick={() => handleIssueSelect(ISSUE.OTHER)}
-                />
-              </div>
-
-              {/* REVIEW CAROUSEL */}
-              <div className='col-span-2 md:col-span-2 row-span-1'>
-                <ReviewCarousel />
-              </div>
-            </div>
-
-            {/* 3. CONTENT SECTIONS */}
-            <div className='mt-12 md:mt-16'>
-              <ContentSections />
-            </div>
+            <h1 className='text-3xl font-light tracking-tight text-slate-800'>
+              Good Morning, <br />
+              <span className='font-semibold text-rose-500'>Toronto.</span>
+            </h1>
           </div>
-        )}
+          <button className='p-3 rounded-full hover:bg-rose-50 transition-colors group'>
+            <div className='w-6 h-4 flex flex-col justify-between items-end'>
+              <span className='w-full h-0.5 bg-rose-950 rounded-full group-hover:w-full transition-all' />
+              <span className='w-2/3 h-0.5 bg-rose-950 rounded-full group-hover:w-full transition-all' />
+              <span className='w-1/3 h-0.5 bg-rose-950 rounded-full group-hover:w-full transition-all' />
+            </div>
+          </button>
+        </header>
 
-        {/* VIEW: SMART QUOTE WIZARD */}
-        {currentView === VIEW.QUOTE && (
-          <div className='max-w-2xl mx-auto w-full'>
-            <SmartQuote issueType={selectedIssue} onBack={goToGrid} />
+        {/* DYNAMIC GRID */}
+        <div className='flex-1 px-6 pb-6 z-10 flex flex-col gap-6'>
+          <div className='grid grid-cols-2 gap-3'>
+            {loading ? (
+              <div className='col-span-2 text-center text-sm text-rose-300 py-10 animate-pulse'>
+                Loading controls...
+              </div>
+            ) : (
+              tiles.map((tile, idx) => {
+                const IconComponent = ICON_MAP[tile.icon] || ICON_MAP['Default'];
+
+                const getColorStyles = (variant) => {
+                  switch (variant) {
+                    case 'orange':
+                      return 'bg-orange-50 text-orange-600 border-orange-100 hover:border-orange-300';
+                    case 'blue':
+                      return 'bg-blue-50 text-blue-600 border-blue-100 hover:border-blue-300';
+                    case 'rose':
+                      return 'bg-rose-50 text-rose-600 border-rose-100 hover:border-rose-300';
+                    default:
+                      return 'bg-slate-50 text-slate-600 border-slate-100 hover:border-slate-300';
+                  }
+                };
+
+                return (
+                  <button
+                    key={idx}
+                    className={`${tile.layout || 'col-span-1'} group relative p-5 rounded-[28px] border transition-all duration-300 hover:shadow-lg hover:shadow-rose-100/50 hover:-translate-y-1 active:scale-95 flex flex-col justify-between h-32 ${getColorStyles(tile.variant)}`}
+                  >
+                    <div className='flex justify-between items-start w-full'>
+                      <div
+                        className={`p-2.5 rounded-2xl bg-white shadow-sm transition-colors ${getColorStyles(tile.variant)}`}
+                      >
+                        <IconComponent size={20} strokeWidth={2.5} />
+                      </div>
+                      <ArrowRight
+                        size={16}
+                        className='opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300'
+                      />
+                    </div>
+                    <span className='font-semibold text-left text-lg leading-tight'>
+                      {tile.label}
+                    </span>
+                  </button>
+                );
+              })
+            )}
           </div>
-        )}
+
+          <div className='h-48'>
+            <ReviewCarousel />
+          </div>
+        </div>
+
+        <div className='absolute top-0 left-0 w-full h-[500px] bg-gradient-to-b from-rose-50/50 to-transparent pointer-events-none' />
       </div>
     </main>
   );

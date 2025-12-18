@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { client } from '@/sanity/lib/client';
+import { urlFor } from '@/sanity/lib/image'; // Ensure this file exists
 import {
   Flame,
   Snowflake,
@@ -31,8 +32,10 @@ const ICON_MAP = {
 
 // --- MAIN PAGE COMPONENT ---
 export default function Home() {
+  const [pageData, setPageData] = useState(null); // Stores Heading/Alignment
   const [tiles, setTiles] = useState([]);
   const [loading, setLoading] = useState(true);
+
   const [currentView, setCurrentView] = useState('GRID');
   const [selectedIssue, setSelectedIssue] = useState(null);
 
@@ -46,33 +49,48 @@ export default function Home() {
     setCurrentView('GRID');
   }, []);
 
+  // --- FETCH DATA ---
   useEffect(() => {
-    const fetchTiles = async () => {
+    const fetchData = async () => {
       try {
-        const data = await client.fetch(`*[_type == "homepage"][0]{ heroTiles }`);
-        if (data?.heroTiles) setTiles(data.heroTiles);
+        const data = await client.fetch(`*[_type == "homepage"][0]{
+          heading,
+          subheading,
+          headerAlignment,
+          heroTiles[]{
+            ...,
+            backgroundImage
+          }
+        }`);
+
+        if (data) {
+          setPageData(data);
+          setTiles(data.heroTiles || []);
+        }
       } catch (error) {
-        console.error('Failed to fetch tiles:', error);
+        console.error('Failed to fetch data:', error);
       } finally {
         setLoading(false);
       }
     };
-    fetchTiles();
+    fetchData();
   }, []);
 
   return (
     <main className='min-h-screen bg-[#FDF8F6] text-rose-950 selection:bg-rose-200'>
-      {/* FIX 1: Changed max-w-md to max-w-5xl 
-         This allows the content to stretch to 1024px on desktop 
-      */}
       <div className='max-w-5xl mx-auto min-h-screen flex flex-col relative bg-transparent overflow-x-hidden'>
         {/* --- VIEW 1: DASHBOARD --- */}
         {currentView === 'GRID' && (
           <div className='flex-1 flex flex-col animate-in fade-in duration-500'>
-            {/* Header */}
-            <header className='px-6 pt-12 pb-6 flex justify-between items-start z-10 relative'>
-              <div>
-                <div className='flex items-center gap-2 mb-2'>
+            {/* DYNAMIC HEADER */}
+            <header
+              className={`px-6 pt-12 pb-6 flex flex-col justify-center z-10 relative ${pageData?.headerAlignment || 'text-left'}`}
+            >
+              {/* Logo Area (Adjust alignment based on headerAlignment) */}
+              <div
+                className={`mb-4 ${pageData?.headerAlignment?.includes('center') ? 'flex justify-center' : ''}`}
+              >
+                <div className='flex items-center gap-2'>
                   <div className='w-8 h-8 rounded-full bg-rose-500 flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-rose-200'>
                     <Flame size={16} fill='white' />
                   </div>
@@ -80,25 +98,19 @@ export default function Home() {
                     GTA Home Comfort
                   </span>
                 </div>
-                <h1 className='text-3xl md:text-5xl font-light tracking-tight text-slate-800'>
-                  Good Morning, <br />
-                  <span className='font-semibold text-rose-500'>Toronto.</span>
-                </h1>
               </div>
-              <button className='p-3 rounded-full hover:bg-rose-50 transition-colors group'>
-                <div className='w-6 h-4 flex flex-col justify-between items-end'>
-                  <span className='w-full h-0.5 bg-rose-950 rounded-full group-hover:w-full transition-all' />
-                  <span className='w-2/3 h-0.5 bg-rose-950 rounded-full group-hover:w-full transition-all' />
-                  <span className='w-1/3 h-0.5 bg-rose-950 rounded-full group-hover:w-full transition-all' />
-                </div>
-              </button>
+
+              {/* Editable Text */}
+              <h1 className='text-3xl md:text-5xl font-light tracking-tight text-slate-800'>
+                {pageData?.heading || 'Good Morning,'} <br />
+                <span className='font-semibold text-rose-500'>
+                  {pageData?.subheading || 'Toronto.'}
+                </span>
+              </h1>
             </header>
 
-            {/* Dynamic Content */}
+            {/* CONTROL GRID */}
             <div className='flex-1 px-6 pb-6 z-10 flex flex-col gap-6'>
-              {/* FIX 2: Added md:grid-cols-4 
-                  On Mobile: 2 columns. On Desktop: 4 columns.
-              */}
               <div className='grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4'>
                 {loading ? (
                   <div className='col-span-2 text-center text-sm text-rose-300 py-10 animate-pulse'>
@@ -107,27 +119,33 @@ export default function Home() {
                 ) : (
                   tiles.map((tile, idx) => {
                     const IconComponent = ICON_MAP[tile.icon] || ICON_MAP['Default'];
+
+                    // Style Helper
                     const getTheme = (variant) => {
                       switch (variant) {
                         case 'orange':
                           return {
                             card: 'bg-[#FFF8F6] border-orange-100 hover:border-orange-300 text-orange-600',
                             icon: 'text-orange-500',
+                            gradient: 'from-orange-50/90',
                           };
                         case 'blue':
                           return {
                             card: 'bg-blue-50/50 border-blue-100 hover:border-blue-300 text-blue-600',
                             icon: 'text-blue-500',
+                            gradient: 'from-blue-50/90',
                           };
                         case 'rose':
                           return {
                             card: 'bg-rose-50/50 border-rose-100 hover:border-rose-300 text-rose-600',
                             icon: 'text-rose-500',
+                            gradient: 'from-rose-50/90',
                           };
                         default:
                           return {
                             card: 'bg-white border-slate-100 hover:border-slate-300 text-slate-600',
                             icon: 'text-slate-500',
+                            gradient: 'from-white/90',
                           };
                       }
                     };
@@ -141,11 +159,29 @@ export default function Home() {
                           ${tile.layout || 'col-span-1'} 
                           group relative p-5 rounded-[32px] border transition-all duration-300 
                           hover:shadow-lg hover:shadow-rose-100/20 hover:-translate-y-1 active:scale-95
-                          flex flex-col justify-between h-36 md:h-44
+                          flex flex-col justify-between h-36 md:h-44 overflow-hidden
                           ${theme.card}
                         `}
                       >
-                        <div className='flex justify-between items-start w-full'>
+                        {/* 1. BACKGROUND IMAGE (Optional) */}
+                        {tile.backgroundImage && (
+                          <>
+                            <div className='absolute inset-0 z-0'>
+                              <img
+                                src={urlFor(tile.backgroundImage).width(600).url()}
+                                alt={tile.label}
+                                className='w-full h-full object-cover opacity-100 transition-transform duration-700 group-hover:scale-110'
+                              />
+                            </div>
+                            {/* Gradient Overlay to ensure text readability */}
+                            <div
+                              className={`absolute inset-0 z-0 bg-gradient-to-t ${theme.gradient} to-white/40`}
+                            />
+                          </>
+                        )}
+
+                        {/* 2. FOREGROUND CONTENT (z-10) */}
+                        <div className='relative z-10 flex justify-between items-start w-full'>
                           <div
                             className={`
                             w-10 h-10 rounded-2xl bg-white shadow-sm flex items-center justify-center
@@ -159,7 +195,8 @@ export default function Home() {
                             className={`opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 ${theme.icon}`}
                           />
                         </div>
-                        <span className='font-bold text-left text-lg md:text-xl tracking-tight leading-none'>
+
+                        <span className='relative z-10 font-bold text-left text-lg md:text-xl tracking-tight leading-none'>
                           {tile.label}
                         </span>
                       </button>
@@ -168,13 +205,12 @@ export default function Home() {
                 )}
               </div>
 
-              {/* Dynamic Review Carousel */}
-              {/* FIX 3: Let this go wider on desktop (md:w-1/2) if you want, or keep full width */}
+              {/* Review Carousel */}
               <div className='h-48 shrink-0'>
                 <ReviewCarousel />
               </div>
 
-              {/* Old Content Sections */}
+              {/* Content Sections */}
               <div className='mt-4 pb-12 border-t border-rose-100/50 pt-8'>
                 <ContentSections />
               </div>
@@ -191,7 +227,7 @@ export default function Home() {
           </div>
         )}
 
-        {/* Background Gradient */}
+        {/* Global Background Gradient */}
         <div className='absolute top-0 left-0 w-full h-[500px] bg-gradient-to-b from-rose-50/50 to-transparent pointer-events-none' />
       </div>
     </main>

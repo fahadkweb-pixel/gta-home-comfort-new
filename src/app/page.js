@@ -14,7 +14,6 @@ import {
 } from 'lucide-react';
 
 // --- IMPORTS FOR YOUR OTHER COMPONENTS ---
-// Ensure these files exist in your components folder!
 import SmartQuote from './components/SmartQuote';
 import ContentSections from './components/ContentSections';
 
@@ -32,15 +31,11 @@ const ICON_MAP = {
 
 // --- MAIN PAGE COMPONENT ---
 export default function Home() {
-  // Data State
   const [tiles, setTiles] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  // View State
-  const [currentView, setCurrentView] = useState('GRID'); // 'GRID' or 'QUOTE'
+  const [currentView, setCurrentView] = useState('GRID');
   const [selectedIssue, setSelectedIssue] = useState(null);
 
-  // --- ACTIONS ---
   const handleIssueSelect = useCallback((tileLabel) => {
     setSelectedIssue(tileLabel);
     setCurrentView('QUOTE');
@@ -51,7 +46,6 @@ export default function Home() {
     setCurrentView('GRID');
   }, []);
 
-  // --- FETCH TILES ---
   useEffect(() => {
     const fetchTiles = async () => {
       try {
@@ -68,7 +62,10 @@ export default function Home() {
 
   return (
     <main className='min-h-screen bg-[#FDF8F6] text-rose-950 selection:bg-rose-200'>
-      <div className='max-w-md mx-auto min-h-screen flex flex-col relative bg-white sm:shadow-2xl sm:shadow-rose-100/50 overflow-hidden'>
+      {/* FIX 1: Changed max-w-md to max-w-5xl 
+         This allows the content to stretch to 1024px on desktop 
+      */}
+      <div className='max-w-5xl mx-auto min-h-screen flex flex-col relative bg-transparent overflow-x-hidden'>
         {/* --- VIEW 1: DASHBOARD --- */}
         {currentView === 'GRID' && (
           <div className='flex-1 flex flex-col animate-in fade-in duration-500'>
@@ -83,7 +80,7 @@ export default function Home() {
                     GTA Home Comfort
                   </span>
                 </div>
-                <h1 className='text-3xl font-light tracking-tight text-slate-800'>
+                <h1 className='text-3xl md:text-5xl font-light tracking-tight text-slate-800'>
                   Good Morning, <br />
                   <span className='font-semibold text-rose-500'>Toronto.</span>
                 </h1>
@@ -99,8 +96,10 @@ export default function Home() {
 
             {/* Dynamic Content */}
             <div className='flex-1 px-6 pb-6 z-10 flex flex-col gap-6'>
-              {/* Control Grid */}
-              <div className='grid grid-cols-2 gap-3'>
+              {/* FIX 2: Added md:grid-cols-4 
+                  On Mobile: 2 columns. On Desktop: 4 columns.
+              */}
+              <div className='grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4'>
                 {loading ? (
                   <div className='col-span-2 text-center text-sm text-rose-300 py-10 animate-pulse'>
                     Loading controls...
@@ -108,8 +107,6 @@ export default function Home() {
                 ) : (
                   tiles.map((tile, idx) => {
                     const IconComponent = ICON_MAP[tile.icon] || ICON_MAP['Default'];
-
-                    // Theme Logic
                     const getTheme = (variant) => {
                       switch (variant) {
                         case 'orange':
@@ -144,7 +141,7 @@ export default function Home() {
                           ${tile.layout || 'col-span-1'} 
                           group relative p-5 rounded-[32px] border transition-all duration-300 
                           hover:shadow-lg hover:shadow-rose-100/20 hover:-translate-y-1 active:scale-95
-                          flex flex-col justify-between h-36
+                          flex flex-col justify-between h-36 md:h-44
                           ${theme.card}
                         `}
                       >
@@ -162,7 +159,7 @@ export default function Home() {
                             className={`opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 ${theme.icon}`}
                           />
                         </div>
-                        <span className='font-bold text-left text-lg tracking-tight leading-none'>
+                        <span className='font-bold text-left text-lg md:text-xl tracking-tight leading-none'>
                           {tile.label}
                         </span>
                       </button>
@@ -172,6 +169,7 @@ export default function Home() {
               </div>
 
               {/* Dynamic Review Carousel */}
+              {/* FIX 3: Let this go wider on desktop (md:w-1/2) if you want, or keep full width */}
               <div className='h-48 shrink-0'>
                 <ReviewCarousel />
               </div>
@@ -186,9 +184,8 @@ export default function Home() {
 
         {/* --- VIEW 2: SMART QUOTE --- */}
         {currentView === 'QUOTE' && (
-          <div className='flex-1 z-20 bg-white animate-in slide-in-from-right duration-300'>
+          <div className='flex-1 z-20 bg-white animate-in slide-in-from-right duration-300 rounded-3xl shadow-2xl min-h-[600px]'>
             <div className='p-6'>
-              {/* Note: We pass the Tile Label (e.g. "No Heat") as the issueType */}
               <SmartQuote issueType={selectedIssue} onBack={goToGrid} />
             </div>
           </div>
@@ -201,27 +198,21 @@ export default function Home() {
   );
 }
 
-// --- DYNAMIC CAROUSEL COMPONENT (Lives here now) ---
+// --- CAROUSEL COMPONENT ---
 function ReviewCarousel() {
   const [reviews, setReviews] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
   const [currentTranslate, setCurrentTranslate] = useState(0);
-
   const containerRef = useRef(null);
 
-  // Fetch real reviews
   useEffect(() => {
     const fetchReviews = async () => {
       try {
-        const data = await client.fetch(`*[_type == "review"]{
-          "id": _id,
-          author,
-          stars,
-          text,
-          date
-        }`);
+        const data = await client.fetch(
+          `*[_type == "review"]{ "id": _id, author, stars, text, date }`
+        );
         setReviews(data);
       } catch (error) {
         console.error('Failed to fetch reviews:', error);
@@ -230,7 +221,6 @@ function ReviewCarousel() {
     fetchReviews();
   }, []);
 
-  // Use real reviews or loading state
   const activeReviews =
     reviews.length > 0
       ? reviews
@@ -244,7 +234,6 @@ function ReviewCarousel() {
           },
         ];
 
-  // Auto-play
   useEffect(() => {
     if (isDragging) return;
     const interval = setInterval(() => {
@@ -253,31 +242,24 @@ function ReviewCarousel() {
     return () => clearInterval(interval);
   }, [isDragging, activeReviews.length]);
 
-  // Drag Logic
   const onPointerDown = (e) => {
     setIsDragging(true);
     setStartX(e.clientX || e.touches[0].clientX);
     if (containerRef.current) containerRef.current.style.transition = 'none';
   };
-
   const onPointerMove = (e) => {
     if (!isDragging) return;
     const currentX = e.clientX || e.touches[0].clientX;
     const diff = currentX - startX;
     const containerWidth = containerRef.current?.offsetWidth || 1;
-    const movePercent = (diff / containerWidth) * 100;
-    setCurrentTranslate(movePercent);
+    setCurrentTranslate((diff / containerWidth) * 100);
   };
-
   const onPointerUp = () => {
     setIsDragging(false);
     if (containerRef.current) containerRef.current.style.transition = 'transform 0.5s ease-out';
-    const threshold = 20;
-    if (currentTranslate < -threshold) {
-      setCurrentIndex((prev) => (prev + 1) % activeReviews.length);
-    } else if (currentTranslate > threshold) {
+    if (currentTranslate < -20) setCurrentIndex((prev) => (prev + 1) % activeReviews.length);
+    else if (currentTranslate > 20)
       setCurrentIndex((prev) => (prev === 0 ? activeReviews.length - 1 : prev - 1));
-    }
     setCurrentTranslate(0);
   };
 
@@ -297,14 +279,11 @@ function ReviewCarousel() {
           See what our customers are saying
         </div>
       </div>
-
       <div className='flex-1 relative mt-6 overflow-hidden'>
         <div
           ref={containerRef}
           className='flex h-full w-full transition-transform duration-500 ease-out'
-          style={{
-            transform: `translateX(calc(-${currentIndex * 100}% + ${currentTranslate}%))`,
-          }}
+          style={{ transform: `translateX(calc(-${currentIndex * 100}% + ${currentTranslate}%))` }}
         >
           {activeReviews.map((review) => (
             <div key={review.id} className='min-w-full h-full flex flex-col justify-end px-1 pb-6'>
@@ -321,7 +300,6 @@ function ReviewCarousel() {
                   "{review.text}"
                 </p>
               </div>
-
               <div className='mt-2 pointer-events-none'>
                 <div className='text-xs font-bold text-rose-400 uppercase tracking-wider truncate'>
                   {review.author}
@@ -334,7 +312,6 @@ function ReviewCarousel() {
           ))}
         </div>
       </div>
-
       <div className='absolute bottom-5 left-5 right-5 flex justify-between items-end pointer-events-none'>
         <div className='text-[10px] font-medium text-rose-300 uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity'>
           Drag to slide
@@ -343,9 +320,7 @@ function ReviewCarousel() {
           {activeReviews.map((_, idx) => (
             <div
               key={idx}
-              className={`h-1.5 rounded-full transition-all duration-300 ${
-                idx === currentIndex ? 'w-4 bg-rose-400' : 'w-1.5 bg-rose-200'
-              }`}
+              className={`h-1.5 rounded-full transition-all duration-300 ${idx === currentIndex ? 'w-4 bg-rose-400' : 'w-1.5 bg-rose-200'}`}
             />
           ))}
         </div>

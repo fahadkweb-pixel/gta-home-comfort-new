@@ -17,9 +17,6 @@ import {
 import SmartQuote from './components/SmartQuote';
 import ContentSections from './components/ContentSections';
 
-// Optional: Metadata for SEO (Only if you didn't move it to layout.js yet)
-// export const metadata = { ... };
-
 const ICON_MAP = {
   Flame: Flame,
   Snowflake: Snowflake,
@@ -110,7 +107,6 @@ export default function Home() {
                   tiles.map((tile, idx) => {
                     const IconComponent = ICON_MAP[tile.icon] || ICON_MAP['Default'];
 
-                    // --- THEME COLORS ---
                     const getTheme = (variant) => {
                       switch (variant) {
                         case 'orange':
@@ -152,16 +148,13 @@ export default function Home() {
                     };
                     const theme = getTheme(tile.variant);
 
-                    // --- HEIGHT & LAYOUT ---
-                    // 1. We increase the height significantly (h-52 / h-64) to allow for the split view
+                    // --- HEIGHT LOGIC (UPDATED) ---
+                    // Increased mobile height to h-64 and desktop to h-80
                     const isTall = tile.layout?.includes('row-span-2');
-                    const heightClass = isTall ? 'h-80 md:h-96' : 'h-52 md:h-64';
+                    const heightClass = isTall ? 'h-80 md:h-96' : 'h-64 md:h-80';
 
-                    // 2. Font Logic
                     const fontWeight = tile.labelBold === false ? 'font-medium' : 'font-semibold';
 
-                    // 3. Text Color (Fallback logic, since split cards usually have dark text on light bg)
-                    // If split card, we force dark text for readability. If standard card, we use user pref.
                     const forceDarkText = !!tile.backgroundImage;
                     const getTextColor = (colorOption) => {
                       if (forceDarkText) return { main: 'text-slate-900', sub: 'text-slate-500' };
@@ -193,16 +186,15 @@ export default function Home() {
                         {/* --- SCENARIO A: SPLIT CARD (Has Image) --- */}
                         {tile.backgroundImage ? (
                           <>
-                            {/* TOP HALF: Image & Icon */}
-                            <div className='relative h-[55%] w-full overflow-hidden'>
+                            {/* TOP IMAGE AREA (Increased to 65% of height) */}
+                            <div className='relative h-[65%] w-full overflow-hidden bg-white'>
                               <img
                                 src={urlFor(tile.backgroundImage).width(600).url()}
                                 alt={tile.label}
-                                className='w-full h-full object-cover transition-transform duration-700 group-hover:scale-105'
+                                className='w-full h-full object-contain p-2 transition-transform duration-700 group-hover:scale-105'
                               />
-                              {/* Icon Floats on top of image */}
                               <div className='absolute top-4 left-4 z-10'>
-                                <div className='w-10 h-10 rounded-2xl bg-white/95 backdrop-blur-sm shadow-sm flex items-center justify-center'>
+                                <div className='w-10 h-10 rounded-2xl bg-white/95 backdrop-blur-sm shadow-sm flex items-center justify-center border border-slate-100'>
                                   <IconComponent
                                     size={20}
                                     strokeWidth={2.5}
@@ -212,57 +204,55 @@ export default function Home() {
                               </div>
                             </div>
 
-                            {/* BOTTOM HALF: Text Area (Solid Color) */}
-                            <div className='relative h-[45%] w-full p-5 flex flex-col justify-center'>
+                            {/* BOTTOM TEXT AREA (Reduced to 35% of height, Reduced padding) */}
+                            <div className='relative h-[35%] w-full px-5 py-3 flex flex-col justify-center bg-inherit'>
                               <span
-                                className={`block ${fontWeight} text-lg md:text-2xl tracking-tight leading-none ${textStyle.main}`}
+                                className={`block ${fontWeight} text-lg md:text-xl tracking-tight leading-none ${textStyle.main}`}
                               >
                                 {tile.label}
                               </span>
                               {tile.subtitle && (
                                 <span
-                                  className={`block mt-1.5 text-[13px] md:text-sm font-medium ${textStyle.sub}`}
+                                  className={`block mt-1 text-[13px] font-medium opacity-90 ${textStyle.sub}`}
                                 >
                                   {tile.subtitle}
                                 </span>
                               )}
-                              {/* Arrow Indicator */}
-                              <div className='absolute bottom-5 right-5'>
+                              <div className='absolute bottom-4 right-4'>
                                 <ArrowRight
-                                  size={18}
+                                  size={16}
                                   className='text-slate-300 group-hover:text-slate-900 -translate-x-2 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 transition-all duration-300'
                                 />
                               </div>
                             </div>
                           </>
                         ) : (
-                          /* --- SCENARIO B: STANDARD CARD (No Image) --- */
-                          /* Keeps the original layout but with more breathing room from the new height */
-                          <div className='w-full h-full p-5 flex flex-col justify-between'>
+                          /* --- SCENARIO B: STANDARD CARD --- */
+                          <div className='w-full h-full p-6 flex flex-col justify-between'>
                             <div className='flex justify-between items-start w-full'>
                               <div
                                 className={`
-                                w-10 h-10 rounded-2xl bg-white shadow-sm flex items-center justify-center
+                                w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center
                                 transition-transform group-hover:scale-110 duration-300
                               `}
                               >
-                                <IconComponent size={20} strokeWidth={2.5} className={theme.icon} />
+                                <IconComponent size={24} strokeWidth={2.5} className={theme.icon} />
                               </div>
                               <ArrowRight
-                                size={18}
+                                size={20}
                                 className={`opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 ${theme.icon}`}
                               />
                             </div>
 
                             <div>
                               <span
-                                className={`block ${fontWeight} text-lg md:text-2xl tracking-tight leading-none ${textStyle.main}`}
+                                className={`block ${fontWeight} text-xl md:text-2xl tracking-tight leading-none ${textStyle.main}`}
                               >
                                 {tile.label}
                               </span>
                               {tile.subtitle && (
                                 <span
-                                  className={`block mt-1.5 text-[13px] md:text-sm font-medium ${textStyle.sub}`}
+                                  className={`block mt-2 text-sm md:text-base font-medium ${textStyle.sub}`}
                                 >
                                   {tile.subtitle}
                                 </span>

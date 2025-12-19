@@ -148,10 +148,10 @@ export default function Home() {
                     };
                     const theme = getTheme(tile.variant);
 
-                    // --- HEIGHT LOGIC (UPDATED) ---
-                    // Increased mobile height to h-64 and desktop to h-80
+                    // --- HEIGHT LOGIC (Tightened Up) ---
+                    // Mobile: h-60 (was h-64) | Desktop: h-72 (was h-80/96)
                     const isTall = tile.layout?.includes('row-span-2');
-                    const heightClass = isTall ? 'h-80 md:h-96' : 'h-64 md:h-80';
+                    const heightClass = isTall ? 'h-80 md:h-96' : 'h-60 md:h-72';
 
                     const fontWeight = tile.labelBold === false ? 'font-medium' : 'font-semibold';
 
@@ -186,12 +186,12 @@ export default function Home() {
                         {/* --- SCENARIO A: SPLIT CARD (Has Image) --- */}
                         {tile.backgroundImage ? (
                           <>
-                            {/* TOP IMAGE AREA (Increased to 65% of height) */}
-                            <div className='relative h-[65%] w-full overflow-hidden bg-white'>
+                            {/* TOP IMAGE AREA (60% Height - Object Cover to fill width) */}
+                            <div className='relative h-[60%] w-full overflow-hidden bg-white'>
                               <img
                                 src={urlFor(tile.backgroundImage).width(600).url()}
                                 alt={tile.label}
-                                className='w-full h-full object-contain p-2 transition-transform duration-700 group-hover:scale-105'
+                                className='w-full h-full object-cover transition-transform duration-700 group-hover:scale-105'
                               />
                               <div className='absolute top-4 left-4 z-10'>
                                 <div className='w-10 h-10 rounded-2xl bg-white/95 backdrop-blur-sm shadow-sm flex items-center justify-center border border-slate-100'>
@@ -204,8 +204,8 @@ export default function Home() {
                               </div>
                             </div>
 
-                            {/* BOTTOM TEXT AREA (Reduced to 35% of height, Reduced padding) */}
-                            <div className='relative h-[35%] w-full px-5 py-3 flex flex-col justify-center bg-inherit'>
+                            {/* BOTTOM TEXT AREA (40% Height - Balanced) */}
+                            <div className='relative h-[40%] w-full px-5 flex flex-col justify-center bg-inherit border-t border-slate-50'>
                               <span
                                 className={`block ${fontWeight} text-lg md:text-xl tracking-tight leading-none ${textStyle.main}`}
                               >
@@ -213,7 +213,7 @@ export default function Home() {
                               </span>
                               {tile.subtitle && (
                                 <span
-                                  className={`block mt-1 text-[13px] font-medium opacity-90 ${textStyle.sub}`}
+                                  className={`block mt-1.5 text-[13px] font-medium opacity-90 ${textStyle.sub}`}
                                 >
                                   {tile.subtitle}
                                 </span>

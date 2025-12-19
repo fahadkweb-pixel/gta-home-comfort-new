@@ -265,10 +265,9 @@ export default function Home() {
                 )}
               </div>
 
-              <div className='h-48 shrink-0'>
+              <div className='h-64 md:h-56 shrink-0'>
                 <ReviewCarousel />
               </div>
-
               <div className='mt-4 pb-12 border-t border-rose-100/50 pt-8'>
                 <ContentSections />
               </div>
@@ -358,7 +357,7 @@ function ReviewCarousel() {
 
   return (
     <div
-      className='w-full h-full p-6 rounded-[32px] bg-white/40 border border-rose-100/50 backdrop-blur-sm flex flex-col justify-between group hover:bg-white/60 transition-all shadow-sm hover:shadow-md cursor-grab active:cursor-grabbing overflow-hidden relative select-none'
+      className='w-full h-full p-5 rounded-[32px] bg-white/40 border border-rose-100/50 backdrop-blur-sm relative group hover:bg-white/60 transition-all shadow-sm hover:shadow-md cursor-grab active:cursor-grabbing overflow-hidden select-none'
       onMouseDown={onPointerDown}
       onMouseMove={onPointerMove}
       onMouseUp={onPointerUp}
@@ -367,24 +366,24 @@ function ReviewCarousel() {
       onTouchMove={onPointerMove}
       onTouchEnd={onPointerUp}
     >
-      {/* FIX 1: Removed 'absolute'. This is now a standard block that pushes content down. */}
-      <div className='z-10 pointer-events-none mb-2'>
+      {/* HEADER: Absolute Top Left */}
+      <div className='absolute top-5 left-5 z-20 pointer-events-none'>
         <div className='text-[10px] font-bold text-rose-400 uppercase tracking-widest'>
           See what our customers are saying
         </div>
       </div>
 
-      {/* FIX 2: Removed 'mt-6'. The flex container handles the spacing now. */}
-      <div className='flex-1 relative overflow-hidden'>
+      {/* CAROUSEL CONTAINER */}
+      <div className='h-full w-full overflow-hidden'>
         <div
           ref={containerRef}
           className='flex h-full w-full transition-transform duration-500 ease-out'
           style={{ transform: `translateX(calc(-${currentIndex * 100}% + ${currentTranslate}%))` }}
         >
           {activeReviews.map((review) => (
-            <div key={review.id} className='min-w-full h-full flex flex-col justify-end px-1 pb-8'>
-              {/* FIX 3: Removed 'pt-14'. No overlapping risks anymore. */}
-              <div className='mb-auto pt-2'>
+            <div key={review.id} className='min-w-full h-full flex flex-col px-1 relative'>
+              {/* CONTENT: Padded from top (pt-12) to clear header, and NO justify-end */}
+              <div className='flex-1 flex flex-col justify-center pt-8 pb-4'>
                 <div className='flex gap-0.5 mb-3'>
                   {[...Array(review.stars || 5)].map((_, i) => (
                     <Star
@@ -393,12 +392,13 @@ function ReviewCarousel() {
                     />
                   ))}
                 </div>
-                <p className='text-rose-950/90 italic font-medium leading-relaxed line-clamp-2 select-none pointer-events-none text-lg md:text-base'>
+                <p className='text-rose-950/90 italic font-medium leading-relaxed line-clamp-3 select-none pointer-events-none text-lg md:text-base'>
                   "{review.text}"
                 </p>
               </div>
 
-              <div className='mt-2 pointer-events-none'>
+              {/* AUTHOR: Pinned to bottom */}
+              <div className='mt-auto pointer-events-none pb-4'>
                 <div className='text-xs font-bold text-rose-400 uppercase tracking-wider truncate'>
                   {review.author}
                 </div>
@@ -411,18 +411,14 @@ function ReviewCarousel() {
         </div>
       </div>
 
-      <div className='absolute bottom-5 left-6 right-6 flex justify-between items-end pointer-events-none'>
-        <div className='text-[10px] font-medium text-rose-300 uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity'>
-          Drag to slide
-        </div>
-        <div className='flex gap-1.5'>
-          {activeReviews.map((_, idx) => (
-            <div
-              key={idx}
-              className={`h-1.5 rounded-full transition-all duration-300 ${idx === currentIndex ? 'w-4 bg-rose-400' : 'w-1.5 bg-rose-200'}`}
-            />
-          ))}
-        </div>
+      {/* SLIDE INDICATORS */}
+      <div className='absolute bottom-5 right-5 flex gap-1.5 pointer-events-none z-20'>
+        {activeReviews.map((_, idx) => (
+          <div
+            key={idx}
+            className={`h-1.5 rounded-full transition-all duration-300 ${idx === currentIndex ? 'w-4 bg-rose-400' : 'w-1.5 bg-rose-200'}`}
+          />
+        ))}
       </div>
     </div>
   );

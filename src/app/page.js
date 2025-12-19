@@ -291,6 +291,7 @@ export default function Home() {
 }
 
 // --- REVIEW CAROUSEL COMPONENT ---
+
 function ReviewCarousel() {
   const [reviews, setReviews] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -357,7 +358,7 @@ function ReviewCarousel() {
 
   return (
     <div
-      className='w-full h-full p-5 rounded-[32px] bg-white/40 border border-rose-100/50 backdrop-blur-sm flex flex-col justify-between group hover:bg-white/60 transition-all shadow-sm hover:shadow-md cursor-grab active:cursor-grabbing overflow-hidden relative select-none'
+      className='w-full h-full p-6 rounded-[32px] bg-white/40 border border-rose-100/50 backdrop-blur-sm flex flex-col justify-between group hover:bg-white/60 transition-all shadow-sm hover:shadow-md cursor-grab active:cursor-grabbing overflow-hidden relative select-none'
       onMouseDown={onPointerDown}
       onMouseMove={onPointerMove}
       onMouseUp={onPointerUp}
@@ -366,22 +367,25 @@ function ReviewCarousel() {
       onTouchMove={onPointerMove}
       onTouchEnd={onPointerUp}
     >
-      <div className='absolute top-5 left-5 z-10 pointer-events-none'>
-        <div className='text-[10px] font-bold text-rose-400 uppercase tracking-widest mb-3'>
+      {/* FIX 1: Removed 'absolute'. This is now a standard block that pushes content down. */}
+      <div className='z-10 pointer-events-none mb-2'>
+        <div className='text-[10px] font-bold text-rose-400 uppercase tracking-widest'>
           See what our customers are saying
         </div>
       </div>
-      <div className='flex-1 relative mt-6 overflow-hidden'>
+
+      {/* FIX 2: Removed 'mt-6'. The flex container handles the spacing now. */}
+      <div className='flex-1 relative overflow-hidden'>
         <div
           ref={containerRef}
           className='flex h-full w-full transition-transform duration-500 ease-out'
           style={{ transform: `translateX(calc(-${currentIndex * 100}% + ${currentTranslate}%))` }}
         >
           {activeReviews.map((review) => (
-            <div key={review.id} className='min-w-full h-full flex flex-col justify-end px-1 pb-6'>
-              {/* FIX: pt-14 pushes content down so stars aren't covered by the header */}
-              <div className='mb-auto pt-14'>
-                <div className='flex gap-0.5 mb-2'>
+            <div key={review.id} className='min-w-full h-full flex flex-col justify-end px-1 pb-8'>
+              {/* FIX 3: Removed 'pt-14'. No overlapping risks anymore. */}
+              <div className='mb-auto pt-2'>
+                <div className='flex gap-0.5 mb-3'>
                   {[...Array(review.stars || 5)].map((_, i) => (
                     <Star
                       key={i}
@@ -389,7 +393,7 @@ function ReviewCarousel() {
                     />
                   ))}
                 </div>
-                <p className='text-rose-950/90 italic font-medium leading-relaxed line-clamp-2 select-none pointer-events-none'>
+                <p className='text-rose-950/90 italic font-medium leading-relaxed line-clamp-2 select-none pointer-events-none text-lg md:text-base'>
                   "{review.text}"
                 </p>
               </div>
@@ -406,7 +410,8 @@ function ReviewCarousel() {
           ))}
         </div>
       </div>
-      <div className='absolute bottom-5 left-5 right-5 flex justify-between items-end pointer-events-none'>
+
+      <div className='absolute bottom-5 left-6 right-6 flex justify-between items-end pointer-events-none'>
         <div className='text-[10px] font-medium text-rose-300 uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity'>
           Drag to slide
         </div>

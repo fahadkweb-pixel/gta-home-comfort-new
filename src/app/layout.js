@@ -10,9 +10,14 @@ const inter = Inter({
 });
 
 export const metadata = {
-  title: 'GTA Home Comfort | Trusted Heating & Cooling Toronto',
+  title: 'Toronto HVAC, Furnace & AC Repair | GTA Home Comfort',
   description:
-    'Expert heating and cooling services in Toronto & the GTA. Fast repairs for furnaces, AC, and water heaters. Start your free quote online today.',
+    'Expert heating and cooling services in Toronto & the GTA. Fast repairs for furnaces, AC, and water heaters. Start your free Smart Quote online today.',
+  openGraph: {
+    title: 'Toronto HVAC, Furnace & AC Repair | GTA Home Comfort',
+    description: 'Expert heating and cooling services in Toronto & the GTA.',
+    type: 'website',
+  },
 };
 
 export default function RootLayout({ children }) {

@@ -17,13 +17,6 @@ import {
 import SmartQuote from './components/SmartQuote';
 import ContentSections from './components/ContentSections';
 
-// SEO Metadata (Optional - you can move this to layout.js if preferred)
-export const metadata = {
-  title: 'Toronto HVAC, Furnace & AC Repair | GTA Home Comfort',
-  description:
-    'Expert heating and cooling services in Toronto & the GTA. Fast repairs for furnaces, AC, and water heaters. Start your free Smart Quote online today.',
-};
-
 const ICON_MAP = {
   Flame: Flame,
   Snowflake: Snowflake,

@@ -10,8 +10,9 @@ const inter = Inter({
 });
 
 export const metadata = {
-  title: 'GTA Home Comfort | Total Climate Control',
-  description: 'Advanced HVAC Diagnostics & Repair',
+  title: 'GTA Home Comfort | Trusted Heating & Cooling Toronto',
+  description:
+    'Expert heating and cooling services in Toronto & the GTA. Fast repairs for furnaces, AC, and water heaters. Start your free quote online today.',
 };
 
 export default function RootLayout({ children }) {

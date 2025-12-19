@@ -12,7 +12,6 @@ export const homepageType = defineType({
       initialValue: 'Home Control Panel',
       readOnly: true,
     }),
-    // --- NEW HEADER FIELDS ---
     defineField({
       name: 'heading',
       title: 'Main Heading',
@@ -24,8 +23,16 @@ export const homepageType = defineType({
       title: 'Highlighted Subheading',
       type: 'string',
       initialValue: 'Toronto.',
-      description: 'This text will appear in the accent color.',
     }),
+    // --- NEW FIELD: Paragraph Text ---
+    defineField({
+      name: 'description',
+      title: 'Intro Paragraph',
+      type: 'text',
+      rows: 3,
+      description: 'Text that appears below the main heading.',
+    }),
+    // ---------------------------------
     defineField({
       name: 'headerAlignment',
       title: 'Text Alignment',
@@ -39,7 +46,6 @@ export const homepageType = defineType({
       },
       initialValue: 'text-left',
     }),
-    // -------------------------
     defineField({
       name: 'heroTiles',
       title: 'Control Grid Tiles',

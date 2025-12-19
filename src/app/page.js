@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { client } from '@/sanity/lib/client';
-import { urlFor } from '@/sanity/lib/image'; // Ensure this file exists
+import { urlFor } from '@/sanity/lib/image';
 import {
   Flame,
   Snowflake,
@@ -30,9 +30,8 @@ const ICON_MAP = {
   Default: ArrowRight,
 };
 
-// --- MAIN PAGE COMPONENT ---
 export default function Home() {
-  const [pageData, setPageData] = useState(null); // Stores Heading/Alignment
+  const [pageData, setPageData] = useState(null);
   const [tiles, setTiles] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -49,13 +48,14 @@ export default function Home() {
     setCurrentView('GRID');
   }, []);
 
-  // --- FETCH DATA ---
+  // --- FETCH DATA (Added 'description' to query) ---
   useEffect(() => {
     const fetchData = async () => {
       try {
         const data = await client.fetch(`*[_type == "homepage"][0]{
           heading,
           subheading,
+          description,  
           headerAlignment,
           heroTiles[]{
             ...,
@@ -86,7 +86,6 @@ export default function Home() {
             <header
               className={`px-6 pt-12 pb-6 flex flex-col justify-center z-10 relative ${pageData?.headerAlignment || 'text-left'}`}
             >
-              {/* Logo Area (Adjust alignment based on headerAlignment) */}
               <div
                 className={`mb-4 ${pageData?.headerAlignment?.includes('center') ? 'flex justify-center' : ''}`}
               >
@@ -100,18 +99,25 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Editable Text */}
-              <h1 className='text-3xl md:text-5xl font-light tracking-tight text-slate-800'>
+              {/* 1. UPDATED: Bold Headings */}
+              <h1 className='text-3xl md:text-5xl font-bold tracking-tight text-slate-800 mb-4'>
                 {pageData?.heading || 'Good Morning,'} <br />
-                <span className='font-semibold text-rose-500'>
+                <span className='font-extrabold text-rose-500'>
                   {pageData?.subheading || 'Toronto.'}
                 </span>
               </h1>
+
+              {/* 2. NEW: Description Paragraph */}
+              {pageData?.description && (
+                <p className='text-lg text-slate-600 max-w-2xl leading-relaxed'>
+                  {pageData.description}
+                </p>
+              )}
             </header>
 
             {/* CONTROL GRID */}
             <div className='flex-1 px-6 pb-6 z-10 flex flex-col gap-6'>
-              <div className='grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4'>
+              <div className='grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 auto-rows-min'>
                 {loading ? (
                   <div className='col-span-2 text-center text-sm text-rose-300 py-10 animate-pulse'>
                     Loading controls...
@@ -120,7 +126,7 @@ export default function Home() {
                   tiles.map((tile, idx) => {
                     const IconComponent = ICON_MAP[tile.icon] || ICON_MAP['Default'];
 
-                    // Style Helper
+                    // 3. UPDATED: Color Theme Logic (Added Cyan, Purple, Amber)
                     const getTheme = (variant) => {
                       switch (variant) {
                         case 'orange':
@@ -141,6 +147,26 @@ export default function Home() {
                             icon: 'text-rose-500',
                             gradient: 'from-rose-50/90',
                           };
+                        // New Colors
+                        case 'cyan':
+                          return {
+                            card: 'bg-cyan-50/50 border-cyan-100 hover:border-cyan-300 text-cyan-700',
+                            icon: 'text-cyan-500',
+                            gradient: 'from-cyan-50/90',
+                          };
+                        case 'purple':
+                          return {
+                            card: 'bg-purple-50/50 border-purple-100 hover:border-purple-300 text-purple-700',
+                            icon: 'text-purple-500',
+                            gradient: 'from-purple-50/90',
+                          };
+                        case 'amber':
+                          return {
+                            card: 'bg-amber-50/50 border-amber-100 hover:border-amber-300 text-amber-700',
+                            icon: 'text-amber-500',
+                            gradient: 'from-amber-50/90',
+                          };
+
                         default:
                           return {
                             card: 'bg-white border-slate-100 hover:border-slate-300 text-slate-600',
@@ -151,6 +177,11 @@ export default function Home() {
                     };
                     const theme = getTheme(tile.variant);
 
+                    // 4. UPDATED: Logic to handle '4x2' height
+                    // If the layout includes 'row-span-2', we make the card taller
+                    const isTall = tile.layout?.includes('row-span-2');
+                    const heightClass = isTall ? 'h-72 md:h-96' : 'h-36 md:h-44';
+
                     return (
                       <button
                         key={idx}
@@ -159,28 +190,25 @@ export default function Home() {
                           ${tile.layout || 'col-span-1'} 
                           group relative p-5 rounded-[32px] border transition-all duration-300 
                           hover:shadow-lg hover:shadow-rose-100/20 hover:-translate-y-1 active:scale-95
-                          flex flex-col justify-between h-36 md:h-44 overflow-hidden
+                          flex flex-col justify-between ${heightClass} overflow-hidden
                           ${theme.card}
                         `}
                       >
-                        {/* 1. BACKGROUND IMAGE (Optional) */}
                         {tile.backgroundImage && (
                           <>
                             <div className='absolute inset-0 z-0'>
                               <img
-                                src={urlFor(tile.backgroundImage).width(600).url()}
+                                src={urlFor(tile.backgroundImage).width(800).url()}
                                 alt={tile.label}
                                 className='w-full h-full object-cover opacity-100 transition-transform duration-700 group-hover:scale-110'
                               />
                             </div>
-                            {/* Gradient Overlay to ensure text readability */}
                             <div
-                              className={`absolute inset-0 z-0 bg-gradient-to-t ${theme.gradient} to-white/40`}
+                              className={`absolute inset-0 z-0 bg-gradient-to-t ${theme.gradient} to-white/10`}
                             />
                           </>
                         )}
 
-                        {/* 2. FOREGROUND CONTENT (z-10) */}
                         <div className='relative z-10 flex justify-between items-start w-full'>
                           <div
                             className={`
@@ -196,7 +224,7 @@ export default function Home() {
                           />
                         </div>
 
-                        <span className='relative z-10 font-bold text-left text-lg md:text-xl tracking-tight leading-none'>
+                        <span className='relative z-10 font-bold text-left text-lg md:text-2xl tracking-tight leading-none'>
                           {tile.label}
                         </span>
                       </button>
@@ -227,14 +255,13 @@ export default function Home() {
           </div>
         )}
 
-        {/* Global Background Gradient */}
         <div className='absolute top-0 left-0 w-full h-[500px] bg-gradient-to-b from-rose-50/50 to-transparent pointer-events-none' />
       </div>
     </main>
   );
 }
 
-// --- CAROUSEL COMPONENT ---
+// --- CAROUSEL COMPONENT (Unchanged) ---
 function ReviewCarousel() {
   const [reviews, setReviews] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);

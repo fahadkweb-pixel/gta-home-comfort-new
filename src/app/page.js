@@ -17,6 +17,13 @@ import {
 import SmartQuote from './components/SmartQuote';
 import ContentSections from './components/ContentSections';
 
+// SEO Metadata (Optional - you can move this to layout.js if preferred)
+export const metadata = {
+  title: 'Toronto HVAC, Furnace & AC Repair | GTA Home Comfort',
+  description:
+    'Expert heating and cooling services in Toronto & the GTA. Fast repairs for furnaces, AC, and water heaters. Start your free Smart Quote online today.',
+};
+
 const ICON_MAP = {
   Flame: Flame,
   Snowflake: Snowflake,
@@ -80,7 +87,6 @@ export default function Home() {
         {currentView === 'GRID' && (
           <div className='flex-1 flex flex-col animate-in fade-in duration-500'>
             {/* --- HEADER --- */}
-            {/* UPDATE 1: Removed the "Logo Pill" section entirely */}
             <header
               className={`px-6 pt-16 pb-8 flex flex-col justify-center z-10 relative ${pageData?.headerAlignment || 'text-left'}`}
             >
@@ -172,10 +178,6 @@ export default function Home() {
                       }
                     };
                     const textStyle = getTextColor(tile.textColor);
-
-                    // UPDATE 2: Cleaner Font Logic
-                    // Use 'font-semibold' instead of 'font-bold' for a cleaner look.
-                    // Use 'tracking-tight' for that modern app feel.
                     const fontWeight = tile.labelBold === false ? 'font-medium' : 'font-semibold';
 
                     return (
@@ -199,7 +201,6 @@ export default function Home() {
                                 className='w-full h-full object-cover opacity-100 transition-transform duration-700 group-hover:scale-105'
                               />
                             </div>
-                            {/* Adjusted gradient for softer text backdrop */}
                             <div
                               className={`absolute inset-0 z-0 bg-gradient-to-t ${theme.gradient} via-white/20 to-transparent`}
                             />
@@ -222,16 +223,16 @@ export default function Home() {
                         </div>
 
                         <div className='relative z-10 text-left'>
-                          {/* UPDATE 2: Refined Text Classes (cleaner, tighter) */}
+                          {/* UPDATED FONT SIZES HERE */}
                           <span
-                            className={`block ${fontWeight} text-xl md:text-2xl tracking-tight leading-none transition-colors drop-shadow-sm ${textStyle.main}`}
+                            className={`block ${fontWeight} text-lg md:text-2xl tracking-tight leading-none transition-colors drop-shadow-sm ${textStyle.main}`}
                           >
                             {tile.label}
                           </span>
 
                           {tile.subtitle && (
                             <span
-                              className={`block mt-1.5 text-sm md:text-base font-medium tracking-normal transition-colors ${textStyle.sub}`}
+                              className={`block mt-1.5 text-[13px] md:text-base font-medium tracking-normal transition-colors ${textStyle.sub}`}
                             >
                               {tile.subtitle}
                             </span>
@@ -268,7 +269,7 @@ export default function Home() {
   );
 }
 
-// ... ReviewCarousel component ...
+// ... ReviewCarousel ...
 function ReviewCarousel() {
   const [reviews, setReviews] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);

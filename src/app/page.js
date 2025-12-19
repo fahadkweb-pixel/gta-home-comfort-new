@@ -53,12 +53,12 @@ export default function Home() {
           subheading,
           description,  
           headerAlignment,
-          desktopGridCols, // <-- Fetch the new grid setting
+          desktopGridCols, 
           heroTiles[]{
             ...,
             backgroundImage,
             textColor,
-            labelBold // <-- Fetch the bold setting
+            labelBold 
           }
         }`);
         if (data) {
@@ -79,43 +79,25 @@ export default function Home() {
       <div className='max-w-5xl mx-auto min-h-screen flex flex-col relative bg-transparent overflow-x-hidden'>
         {currentView === 'GRID' && (
           <div className='flex-1 flex flex-col animate-in fade-in duration-500'>
-            {/* HEADER */}
+            {/* --- HEADER --- */}
+            {/* UPDATE 1: Removed the "Logo Pill" section entirely */}
             <header
-              className={`px-6 pt-12 pb-6 flex flex-col justify-center z-10 relative ${pageData?.headerAlignment || 'text-left'}`}
+              className={`px-6 pt-16 pb-8 flex flex-col justify-center z-10 relative ${pageData?.headerAlignment || 'text-left'}`}
             >
-              <div
-                className={`mb-4 ${pageData?.headerAlignment?.includes('center') ? 'flex justify-center' : ''}`}
-              >
-                <div className='flex items-center gap-2'>
-                  <div className='w-8 h-8 rounded-full bg-rose-500 flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-rose-200'>
-                    <Flame size={16} fill='white' />
-                  </div>
-                  <span className='text-xs font-bold tracking-widest text-rose-400 uppercase'>
-                    GTA Home Comfort
-                  </span>
-                </div>
-              </div>
-
-              <h1 className='text-3xl md:text-5xl font-bold tracking-tight text-slate-800 mb-4'>
+              <h1 className='text-4xl md:text-6xl font-bold tracking-tight text-slate-900 mb-6 leading-[1.1]'>
                 {pageData?.heading || 'Good Morning,'} <br />
-                <span className='font-extrabold text-rose-500'>
-                  {pageData?.subheading || 'Toronto.'}
-                </span>
+                <span className='text-rose-500'>{pageData?.subheading || 'Toronto.'}</span>
               </h1>
 
               {pageData?.description && (
-                <p className='text-lg text-slate-600 max-w-2xl leading-relaxed'>
+                <p className='text-xl md:text-2xl text-slate-600 max-w-2xl leading-relaxed font-medium opacity-90'>
                   {pageData.description}
                 </p>
               )}
             </header>
 
-            {/* CONTROL GRID */}
+            {/* --- CONTROL GRID --- */}
             <div className='flex-1 px-6 pb-6 z-10 flex flex-col gap-6'>
-              {/* DYNAMIC GRID COLUMNS:
-                  We use the variable `pageData.desktopGridCols` to set the class.
-                  Defaults to 'md:grid-cols-4' if not set.
-              */}
               <div
                 className={`grid grid-cols-2 ${pageData?.desktopGridCols || 'md:grid-cols-4'} gap-3 md:gap-4 auto-rows-min`}
               >
@@ -133,43 +115,43 @@ export default function Home() {
                           return {
                             card: 'bg-[#FFF8F6] border-orange-100 hover:border-orange-300',
                             icon: 'text-orange-500',
-                            gradient: 'from-orange-50/90',
+                            gradient: 'from-orange-50/80',
                           };
                         case 'blue':
                           return {
                             card: 'bg-blue-50/50 border-blue-100 hover:border-blue-300',
                             icon: 'text-blue-500',
-                            gradient: 'from-blue-50/90',
+                            gradient: 'from-blue-50/80',
                           };
                         case 'rose':
                           return {
                             card: 'bg-rose-50/50 border-rose-100 hover:border-rose-300',
                             icon: 'text-rose-500',
-                            gradient: 'from-rose-50/90',
+                            gradient: 'from-rose-50/80',
                           };
                         case 'cyan':
                           return {
                             card: 'bg-cyan-50/50 border-cyan-100 hover:border-cyan-300',
                             icon: 'text-cyan-500',
-                            gradient: 'from-cyan-50/90',
+                            gradient: 'from-cyan-50/80',
                           };
                         case 'purple':
                           return {
                             card: 'bg-purple-50/50 border-purple-100 hover:border-purple-300',
                             icon: 'text-purple-500',
-                            gradient: 'from-purple-50/90',
+                            gradient: 'from-purple-50/80',
                           };
                         case 'amber':
                           return {
                             card: 'bg-amber-50/50 border-amber-100 hover:border-amber-300',
                             icon: 'text-amber-500',
-                            gradient: 'from-amber-50/90',
+                            gradient: 'from-amber-50/80',
                           };
                         default:
                           return {
                             card: 'bg-white border-slate-100 hover:border-slate-300',
                             icon: 'text-slate-500',
-                            gradient: 'from-white/90',
+                            gradient: 'from-white/80',
                           };
                       }
                     };
@@ -180,7 +162,7 @@ export default function Home() {
                     const getTextColor = (colorOption) => {
                       switch (colorOption) {
                         case 'light':
-                          return { main: 'text-white', sub: 'text-slate-200' };
+                          return { main: 'text-white', sub: 'text-slate-100/90' };
                         case 'rose':
                           return { main: 'text-rose-600', sub: 'text-rose-400' };
                         case 'blue':
@@ -191,9 +173,10 @@ export default function Home() {
                     };
                     const textStyle = getTextColor(tile.textColor);
 
-                    // --- FONT WEIGHT LOGIC ---
-                    // Default to bold if undefined, otherwise use the toggle
-                    const fontWeight = tile.labelBold === false ? 'font-medium' : 'font-bold';
+                    // UPDATE 2: Cleaner Font Logic
+                    // Use 'font-semibold' instead of 'font-bold' for a cleaner look.
+                    // Use 'tracking-tight' for that modern app feel.
+                    const fontWeight = tile.labelBold === false ? 'font-medium' : 'font-semibold';
 
                     return (
                       <button
@@ -213,11 +196,12 @@ export default function Home() {
                               <img
                                 src={urlFor(tile.backgroundImage).width(800).url()}
                                 alt={tile.label}
-                                className='w-full h-full object-cover opacity-100 transition-transform duration-700 group-hover:scale-110'
+                                className='w-full h-full object-cover opacity-100 transition-transform duration-700 group-hover:scale-105'
                               />
                             </div>
+                            {/* Adjusted gradient for softer text backdrop */}
                             <div
-                              className={`absolute inset-0 z-0 bg-gradient-to-t ${theme.gradient} to-transparent`}
+                              className={`absolute inset-0 z-0 bg-gradient-to-t ${theme.gradient} via-white/20 to-transparent`}
                             />
                           </>
                         )}
@@ -238,16 +222,16 @@ export default function Home() {
                         </div>
 
                         <div className='relative z-10 text-left'>
-                          {/* Apply dynamic fontWeight class here */}
+                          {/* UPDATE 2: Refined Text Classes (cleaner, tighter) */}
                           <span
-                            className={`block ${fontWeight} text-lg md:text-2xl tracking-tight leading-none transition-colors ${textStyle.main}`}
+                            className={`block ${fontWeight} text-xl md:text-2xl tracking-tight leading-none transition-colors drop-shadow-sm ${textStyle.main}`}
                           >
                             {tile.label}
                           </span>
 
                           {tile.subtitle && (
                             <span
-                              className={`block mt-1 text-sm md:text-base font-medium transition-colors ${textStyle.sub}`}
+                              className={`block mt-1.5 text-sm md:text-base font-medium tracking-normal transition-colors ${textStyle.sub}`}
                             >
                               {tile.subtitle}
                             </span>
@@ -284,7 +268,7 @@ export default function Home() {
   );
 }
 
-// ... ReviewCarousel component (no changes needed) ...
+// ... ReviewCarousel component ...
 function ReviewCarousel() {
   const [reviews, setReviews] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);

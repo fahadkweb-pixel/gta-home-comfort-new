@@ -45,7 +45,7 @@ export default function Home() {
     setCurrentView('GRID');
   }, []);
 
-  // --- FETCH DATA (Added 'subtitle') ---
+  // --- FETCH DATA (Added 'textColor') ---
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -56,7 +56,8 @@ export default function Home() {
           headerAlignment,
           heroTiles[]{
             ...,
-            backgroundImage
+            backgroundImage,
+            textColor 
           }
         }`);
         if (data) {
@@ -119,7 +120,6 @@ export default function Home() {
                   tiles.map((tile, idx) => {
                     const IconComponent = ICON_MAP[tile.icon] || ICON_MAP['Default'];
 
-                    // THEME LOGIC: Text color removed from here (handled in JSX below)
                     const getTheme = (variant) => {
                       switch (variant) {
                         case 'orange':
@@ -170,6 +170,21 @@ export default function Home() {
                     const isTall = tile.layout?.includes('row-span-2');
                     const heightClass = isTall ? 'h-72 md:h-96' : 'h-36 md:h-44';
 
+                    // --- TEXT COLOR LOGIC ---
+                    const getTextColor = (colorOption) => {
+                      switch (colorOption) {
+                        case 'light':
+                          return { main: 'text-white', sub: 'text-slate-200' };
+                        case 'rose':
+                          return { main: 'text-rose-600', sub: 'text-rose-400' };
+                        case 'blue':
+                          return { main: 'text-blue-600', sub: 'text-blue-400' };
+                        default:
+                          return { main: 'text-slate-900', sub: 'text-slate-500' }; // Dark is default
+                      }
+                    };
+                    const textStyle = getTextColor(tile.textColor);
+
                     return (
                       <button
                         key={idx}
@@ -191,8 +206,9 @@ export default function Home() {
                                 className='w-full h-full object-cover opacity-100 transition-transform duration-700 group-hover:scale-110'
                               />
                             </div>
+                            {/* Adjusted gradient opacity for better text contrast */}
                             <div
-                              className={`absolute inset-0 z-0 bg-gradient-to-t ${theme.gradient} to-white/10`}
+                              className={`absolute inset-0 z-0 bg-gradient-to-t ${theme.gradient} to-transparent`}
                             />
                           </>
                         )}
@@ -214,14 +230,16 @@ export default function Home() {
 
                         {/* TEXT CONTAINER */}
                         <div className='relative z-10 text-left'>
-                          {/* Main Label: Always Black/Dark Slate */}
-                          <span className='block font-bold text-lg md:text-2xl tracking-tight leading-none text-slate-900 group-hover:text-black transition-colors'>
+                          <span
+                            className={`block font-bold text-lg md:text-2xl tracking-tight leading-none transition-colors ${textStyle.main}`}
+                          >
                             {tile.label}
                           </span>
 
-                          {/* Subtitle: Render if it exists */}
                           {tile.subtitle && (
-                            <span className='block mt-1 text-sm md:text-base font-medium text-slate-500 group-hover:text-slate-700 transition-colors'>
+                            <span
+                              className={`block mt-1 text-sm md:text-base font-medium transition-colors ${textStyle.sub}`}
+                            >
                               {tile.subtitle}
                             </span>
                           )}
@@ -257,7 +275,7 @@ export default function Home() {
   );
 }
 
-// ReviewCarousel component code remains the same...
+// ReviewCarousel remains the same...
 function ReviewCarousel() {
   const [reviews, setReviews] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);

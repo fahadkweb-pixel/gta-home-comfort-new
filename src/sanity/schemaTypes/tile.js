@@ -11,14 +11,12 @@ export const tileType = defineType({
       type: 'string',
       validation: (rule) => rule.required(),
     }),
-    // --- NEW FIELD: Subtitle ---
     defineField({
       name: 'subtitle',
       title: 'Subtitle',
       type: 'string',
-      description: 'Smaller text below the label (e.g. "Furnace / Boiler")',
+      description: 'Smaller text below the label',
     }),
-    // ---------------------------
     defineField({
       name: 'icon',
       title: 'Icon Name',
@@ -27,7 +25,7 @@ export const tileType = defineType({
     }),
     defineField({
       name: 'variant',
-      title: 'Color Theme',
+      title: 'Color Theme (Card Background)',
       type: 'string',
       options: {
         list: [
@@ -43,6 +41,24 @@ export const tileType = defineType({
       },
       initialValue: 'gray',
     }),
+    // --- NEW FIELD: Text Color ---
+    defineField({
+      name: 'textColor',
+      title: 'Text Color',
+      type: 'string',
+      description: 'Choose White if using a dark background image.',
+      options: {
+        list: [
+          { title: 'Black / Dark (Default)', value: 'dark' },
+          { title: 'White / Light', value: 'light' },
+          { title: 'Rose (Brand)', value: 'rose' },
+          { title: 'Blue (Brand)', value: 'blue' },
+        ],
+        layout: 'radio',
+      },
+      initialValue: 'dark',
+    }),
+    // -----------------------------
     defineField({
       name: 'layout',
       title: 'Grid Size',
@@ -68,7 +84,7 @@ export const tileType = defineType({
   preview: {
     select: {
       title: 'label',
-      subtitle: 'subtitle', // Show subtitle in the CMS list too
+      subtitle: 'subtitle',
       media: 'backgroundImage',
     },
   },

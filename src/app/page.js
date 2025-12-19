@@ -14,11 +14,9 @@ import {
   ArrowRight,
 } from 'lucide-react';
 
-// --- IMPORTS FOR YOUR OTHER COMPONENTS ---
 import SmartQuote from './components/SmartQuote';
 import ContentSections from './components/ContentSections';
 
-// --- ICON MAP ---
 const ICON_MAP = {
   Flame: Flame,
   Snowflake: Snowflake,
@@ -34,7 +32,6 @@ export default function Home() {
   const [pageData, setPageData] = useState(null);
   const [tiles, setTiles] = useState([]);
   const [loading, setLoading] = useState(true);
-
   const [currentView, setCurrentView] = useState('GRID');
   const [selectedIssue, setSelectedIssue] = useState(null);
 
@@ -48,7 +45,7 @@ export default function Home() {
     setCurrentView('GRID');
   }, []);
 
-  // --- FETCH DATA (Added 'description' to query) ---
+  // --- FETCH DATA (Added 'subtitle') ---
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -62,7 +59,6 @@ export default function Home() {
             backgroundImage
           }
         }`);
-
         if (data) {
           setPageData(data);
           setTiles(data.heroTiles || []);
@@ -79,10 +75,9 @@ export default function Home() {
   return (
     <main className='min-h-screen bg-[#FDF8F6] text-rose-950 selection:bg-rose-200'>
       <div className='max-w-5xl mx-auto min-h-screen flex flex-col relative bg-transparent overflow-x-hidden'>
-        {/* --- VIEW 1: DASHBOARD --- */}
         {currentView === 'GRID' && (
           <div className='flex-1 flex flex-col animate-in fade-in duration-500'>
-            {/* DYNAMIC HEADER */}
+            {/* HEADER */}
             <header
               className={`px-6 pt-12 pb-6 flex flex-col justify-center z-10 relative ${pageData?.headerAlignment || 'text-left'}`}
             >
@@ -99,7 +94,6 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* 1. UPDATED: Bold Headings */}
               <h1 className='text-3xl md:text-5xl font-bold tracking-tight text-slate-800 mb-4'>
                 {pageData?.heading || 'Good Morning,'} <br />
                 <span className='font-extrabold text-rose-500'>
@@ -107,7 +101,6 @@ export default function Home() {
                 </span>
               </h1>
 
-              {/* 2. NEW: Description Paragraph */}
               {pageData?.description && (
                 <p className='text-lg text-slate-600 max-w-2xl leading-relaxed'>
                   {pageData.description}
@@ -115,7 +108,7 @@ export default function Home() {
               )}
             </header>
 
-            {/* CONTROL GRID */}
+            {/* GRID */}
             <div className='flex-1 px-6 pb-6 z-10 flex flex-col gap-6'>
               <div className='grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 auto-rows-min'>
                 {loading ? (
@@ -126,59 +119,54 @@ export default function Home() {
                   tiles.map((tile, idx) => {
                     const IconComponent = ICON_MAP[tile.icon] || ICON_MAP['Default'];
 
-                    // 3. UPDATED: Color Theme Logic (Added Cyan, Purple, Amber)
+                    // THEME LOGIC: Text color removed from here (handled in JSX below)
                     const getTheme = (variant) => {
                       switch (variant) {
                         case 'orange':
                           return {
-                            card: 'bg-[#FFF8F6] border-orange-100 hover:border-orange-300 text-orange-600',
+                            card: 'bg-[#FFF8F6] border-orange-100 hover:border-orange-300',
                             icon: 'text-orange-500',
                             gradient: 'from-orange-50/90',
                           };
                         case 'blue':
                           return {
-                            card: 'bg-blue-50/50 border-blue-100 hover:border-blue-300 text-blue-600',
+                            card: 'bg-blue-50/50 border-blue-100 hover:border-blue-300',
                             icon: 'text-blue-500',
                             gradient: 'from-blue-50/90',
                           };
                         case 'rose':
                           return {
-                            card: 'bg-rose-50/50 border-rose-100 hover:border-rose-300 text-rose-600',
+                            card: 'bg-rose-50/50 border-rose-100 hover:border-rose-300',
                             icon: 'text-rose-500',
                             gradient: 'from-rose-50/90',
                           };
-                        // New Colors
                         case 'cyan':
                           return {
-                            card: 'bg-cyan-50/50 border-cyan-100 hover:border-cyan-300 text-cyan-700',
+                            card: 'bg-cyan-50/50 border-cyan-100 hover:border-cyan-300',
                             icon: 'text-cyan-500',
                             gradient: 'from-cyan-50/90',
                           };
                         case 'purple':
                           return {
-                            card: 'bg-purple-50/50 border-purple-100 hover:border-purple-300 text-purple-700',
+                            card: 'bg-purple-50/50 border-purple-100 hover:border-purple-300',
                             icon: 'text-purple-500',
                             gradient: 'from-purple-50/90',
                           };
                         case 'amber':
                           return {
-                            card: 'bg-amber-50/50 border-amber-100 hover:border-amber-300 text-amber-700',
+                            card: 'bg-amber-50/50 border-amber-100 hover:border-amber-300',
                             icon: 'text-amber-500',
                             gradient: 'from-amber-50/90',
                           };
-
                         default:
                           return {
-                            card: 'bg-white border-slate-100 hover:border-slate-300 text-slate-600',
+                            card: 'bg-white border-slate-100 hover:border-slate-300',
                             icon: 'text-slate-500',
                             gradient: 'from-white/90',
                           };
                       }
                     };
                     const theme = getTheme(tile.variant);
-
-                    // 4. UPDATED: Logic to handle '4x2' height
-                    // If the layout includes 'row-span-2', we make the card taller
                     const isTall = tile.layout?.includes('row-span-2');
                     const heightClass = isTall ? 'h-72 md:h-96' : 'h-36 md:h-44';
 
@@ -224,21 +212,30 @@ export default function Home() {
                           />
                         </div>
 
-                        <span className='relative z-10 font-bold text-left text-lg md:text-2xl tracking-tight leading-none'>
-                          {tile.label}
-                        </span>
+                        {/* TEXT CONTAINER */}
+                        <div className='relative z-10 text-left'>
+                          {/* Main Label: Always Black/Dark Slate */}
+                          <span className='block font-bold text-lg md:text-2xl tracking-tight leading-none text-slate-900 group-hover:text-black transition-colors'>
+                            {tile.label}
+                          </span>
+
+                          {/* Subtitle: Render if it exists */}
+                          {tile.subtitle && (
+                            <span className='block mt-1 text-sm md:text-base font-medium text-slate-500 group-hover:text-slate-700 transition-colors'>
+                              {tile.subtitle}
+                            </span>
+                          )}
+                        </div>
                       </button>
                     );
                   })
                 )}
               </div>
 
-              {/* Review Carousel */}
               <div className='h-48 shrink-0'>
                 <ReviewCarousel />
               </div>
 
-              {/* Content Sections */}
               <div className='mt-4 pb-12 border-t border-rose-100/50 pt-8'>
                 <ContentSections />
               </div>
@@ -246,7 +243,6 @@ export default function Home() {
           </div>
         )}
 
-        {/* --- VIEW 2: SMART QUOTE --- */}
         {currentView === 'QUOTE' && (
           <div className='flex-1 z-20 bg-white animate-in slide-in-from-right duration-300 rounded-3xl shadow-2xl min-h-[600px]'>
             <div className='p-6'>
@@ -261,7 +257,7 @@ export default function Home() {
   );
 }
 
-// --- CAROUSEL COMPONENT (Unchanged) ---
+// ReviewCarousel component code remains the same...
 function ReviewCarousel() {
   const [reviews, setReviews] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);

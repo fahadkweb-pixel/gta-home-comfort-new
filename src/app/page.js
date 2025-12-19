@@ -148,8 +148,7 @@ export default function Home() {
                     };
                     const theme = getTheme(tile.variant);
 
-                    // --- HEIGHT LOGIC (Tightened Up) ---
-                    // Mobile: h-60 (was h-64) | Desktop: h-72 (was h-80/96)
+                    // --- HEIGHT LOGIC (Tightened for Mobile/Desktop balance) ---
                     const isTall = tile.layout?.includes('row-span-2');
                     const heightClass = isTall ? 'h-80 md:h-96' : 'h-60 md:h-72';
 
@@ -186,7 +185,7 @@ export default function Home() {
                         {/* --- SCENARIO A: SPLIT CARD (Has Image) --- */}
                         {tile.backgroundImage ? (
                           <>
-                            {/* TOP IMAGE AREA (60% Height - Object Cover to fill width) */}
+                            {/* TOP IMAGE AREA (60% Height - Object Cover) */}
                             <div className='relative h-[60%] w-full overflow-hidden bg-white'>
                               <img
                                 src={urlFor(tile.backgroundImage).width(600).url()}
@@ -291,7 +290,7 @@ export default function Home() {
   );
 }
 
-// ... ReviewCarousel component ...
+// --- REVIEW CAROUSEL COMPONENT ---
 function ReviewCarousel() {
   const [reviews, setReviews] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -380,7 +379,8 @@ function ReviewCarousel() {
         >
           {activeReviews.map((review) => (
             <div key={review.id} className='min-w-full h-full flex flex-col justify-end px-1 pb-6'>
-              <div className='mb-auto pt-2'>
+              {/* FIX: pt-14 pushes content down so stars aren't covered by the header */}
+              <div className='mb-auto pt-14'>
                 <div className='flex gap-0.5 mb-2'>
                   {[...Array(review.stars || 5)].map((_, i) => (
                     <Star
@@ -393,6 +393,7 @@ function ReviewCarousel() {
                   "{review.text}"
                 </p>
               </div>
+
               <div className='mt-2 pointer-events-none'>
                 <div className='text-xs font-bold text-rose-400 uppercase tracking-wider truncate'>
                   {review.author}

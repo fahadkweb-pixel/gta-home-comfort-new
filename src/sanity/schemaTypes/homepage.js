@@ -16,23 +16,18 @@ export const homepageType = defineType({
       name: 'heading',
       title: 'Main Heading',
       type: 'string',
-      initialValue: 'Good Morning,',
     }),
     defineField({
       name: 'subheading',
       title: 'Highlighted Subheading',
       type: 'string',
-      initialValue: 'Toronto.',
     }),
-    // --- NEW FIELD: Paragraph Text ---
     defineField({
       name: 'description',
       title: 'Intro Paragraph',
       type: 'text',
       rows: 3,
-      description: 'Text that appears below the main heading.',
     }),
-    // ---------------------------------
     defineField({
       name: 'headerAlignment',
       title: 'Text Alignment',
@@ -46,6 +41,23 @@ export const homepageType = defineType({
       },
       initialValue: 'text-left',
     }),
+    // --- NEW FIELD: Grid Density Control ---
+    defineField({
+      name: 'desktopGridCols',
+      title: 'Desktop Grid Layout',
+      description:
+        'Choose "3 Columns" if you have 3, 6, or 9 tiles. Choose "4 Columns" for 4, 8, 12.',
+      type: 'string',
+      options: {
+        list: [
+          { title: '3 Columns (Good for 6 items)', value: 'md:grid-cols-3' },
+          { title: '4 Columns (Good for 4 or 8 items)', value: 'md:grid-cols-4' },
+        ],
+        layout: 'radio',
+      },
+      initialValue: 'md:grid-cols-4',
+    }),
+    // ---------------------------------------
     defineField({
       name: 'heroTiles',
       title: 'Control Grid Tiles',

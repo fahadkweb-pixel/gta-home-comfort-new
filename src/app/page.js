@@ -45,7 +45,6 @@ export default function Home() {
     setCurrentView('GRID');
   }, []);
 
-  // --- FETCH DATA (Added 'textColor') ---
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -54,10 +53,12 @@ export default function Home() {
           subheading,
           description,  
           headerAlignment,
+          desktopGridCols, // <-- Fetch the new grid setting
           heroTiles[]{
             ...,
             backgroundImage,
-            textColor 
+            textColor,
+            labelBold // <-- Fetch the bold setting
           }
         }`);
         if (data) {
@@ -109,9 +110,15 @@ export default function Home() {
               )}
             </header>
 
-            {/* GRID */}
+            {/* CONTROL GRID */}
             <div className='flex-1 px-6 pb-6 z-10 flex flex-col gap-6'>
-              <div className='grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 auto-rows-min'>
+              {/* DYNAMIC GRID COLUMNS:
+                  We use the variable `pageData.desktopGridCols` to set the class.
+                  Defaults to 'md:grid-cols-4' if not set.
+              */}
+              <div
+                className={`grid grid-cols-2 ${pageData?.desktopGridCols || 'md:grid-cols-4'} gap-3 md:gap-4 auto-rows-min`}
+              >
                 {loading ? (
                   <div className='col-span-2 text-center text-sm text-rose-300 py-10 animate-pulse'>
                     Loading controls...
@@ -170,7 +177,6 @@ export default function Home() {
                     const isTall = tile.layout?.includes('row-span-2');
                     const heightClass = isTall ? 'h-72 md:h-96' : 'h-36 md:h-44';
 
-                    // --- TEXT COLOR LOGIC ---
                     const getTextColor = (colorOption) => {
                       switch (colorOption) {
                         case 'light':
@@ -180,10 +186,14 @@ export default function Home() {
                         case 'blue':
                           return { main: 'text-blue-600', sub: 'text-blue-400' };
                         default:
-                          return { main: 'text-slate-900', sub: 'text-slate-500' }; // Dark is default
+                          return { main: 'text-slate-900', sub: 'text-slate-500' };
                       }
                     };
                     const textStyle = getTextColor(tile.textColor);
+
+                    // --- FONT WEIGHT LOGIC ---
+                    // Default to bold if undefined, otherwise use the toggle
+                    const fontWeight = tile.labelBold === false ? 'font-medium' : 'font-bold';
 
                     return (
                       <button
@@ -206,7 +216,6 @@ export default function Home() {
                                 className='w-full h-full object-cover opacity-100 transition-transform duration-700 group-hover:scale-110'
                               />
                             </div>
-                            {/* Adjusted gradient opacity for better text contrast */}
                             <div
                               className={`absolute inset-0 z-0 bg-gradient-to-t ${theme.gradient} to-transparent`}
                             />
@@ -228,10 +237,10 @@ export default function Home() {
                           />
                         </div>
 
-                        {/* TEXT CONTAINER */}
                         <div className='relative z-10 text-left'>
+                          {/* Apply dynamic fontWeight class here */}
                           <span
-                            className={`block font-bold text-lg md:text-2xl tracking-tight leading-none transition-colors ${textStyle.main}`}
+                            className={`block ${fontWeight} text-lg md:text-2xl tracking-tight leading-none transition-colors ${textStyle.main}`}
                           >
                             {tile.label}
                           </span>
@@ -275,7 +284,7 @@ export default function Home() {
   );
 }
 
-// ReviewCarousel remains the same...
+// ... ReviewCarousel component (no changes needed) ...
 function ReviewCarousel() {
   const [reviews, setReviews] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);

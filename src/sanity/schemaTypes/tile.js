@@ -11,6 +11,15 @@ export const tileType = defineType({
       type: 'string',
       validation: (rule) => rule.required(),
     }),
+    // --- NEW FIELD: Bold Toggle ---
+    defineField({
+      name: 'labelBold',
+      title: 'Bold Label Text?',
+      type: 'boolean',
+      initialValue: true,
+      description: 'Turn off for thinner, lighter text.',
+    }),
+    // ------------------------------
     defineField({
       name: 'subtitle',
       title: 'Subtitle',
@@ -25,7 +34,7 @@ export const tileType = defineType({
     }),
     defineField({
       name: 'variant',
-      title: 'Color Theme (Card Background)',
+      title: 'Color Theme',
       type: 'string',
       options: {
         list: [
@@ -41,24 +50,21 @@ export const tileType = defineType({
       },
       initialValue: 'gray',
     }),
-    // --- NEW FIELD: Text Color ---
     defineField({
       name: 'textColor',
       title: 'Text Color',
       type: 'string',
-      description: 'Choose White if using a dark background image.',
       options: {
         list: [
-          { title: 'Black / Dark (Default)', value: 'dark' },
-          { title: 'White / Light', value: 'light' },
-          { title: 'Rose (Brand)', value: 'rose' },
-          { title: 'Blue (Brand)', value: 'blue' },
+          { title: 'Dark (Default)', value: 'dark' },
+          { title: 'Light (White)', value: 'light' },
+          { title: 'Rose', value: 'rose' },
+          { title: 'Blue', value: 'blue' },
         ],
         layout: 'radio',
       },
       initialValue: 'dark',
     }),
-    // -----------------------------
     defineField({
       name: 'layout',
       title: 'Grid Size',

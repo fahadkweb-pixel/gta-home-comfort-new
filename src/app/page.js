@@ -19,7 +19,8 @@ import {
 
 import SmartQuote from './components/SmartQuote';
 import ContentSections from './components/ContentSections';
-import ReviewCarousel from './components/ReviewCarousel';
+// 1. SWAP IMPORT BACK to the new compact component
+import HomepageReviews from './components/HomepageReviews';
 
 const ICON_MAP = {
   Flame: Flame,
@@ -42,8 +43,6 @@ function HomeContent() {
   const [selectedIssue, setSelectedIssue] = useState(null);
 
   const quoteRef = useRef(null);
-
-  // 1. ADD REF TO PREVENT LOOPS
   const deepLinkHandled = useRef(false);
 
   const searchParams = useSearchParams();
@@ -51,7 +50,6 @@ function HomeContent() {
 
   // --- CHECK URL ON LOAD ---
   useEffect(() => {
-    // 2. GUARD CLAUSE: If we already did this, stop.
     if (deepLinkHandled.current) return;
 
     const mode = searchParams.get('mode');
@@ -61,7 +59,7 @@ function HomeContent() {
       if (mode === 'install') {
         setSelectedIssue('New Installation');
         setCurrentView('QUOTE');
-        deepLinkHandled.current = true; // Mark as done
+        deepLinkHandled.current = true;
       } else if (mode === 'repair') {
         const labelMap = {
           heating: 'Heating System',
@@ -71,10 +69,10 @@ function HomeContent() {
         };
         setSelectedIssue(labelMap[source] || 'General Repair');
         setCurrentView('QUOTE');
-        deepLinkHandled.current = true; // Mark as done
+        deepLinkHandled.current = true;
       }
     }
-  }, [searchParams]); // Removed selectedIssue dependency to prevent re-triggering on close
+  }, [searchParams]);
 
   // --- SCROLL LOGIC ---
   useEffect(() => {
@@ -315,10 +313,12 @@ function HomeContent() {
               )}
             </div>
 
-            <div className='h-64 md:h-56 shrink-0'>
-              <ReviewCarousel />
+            {/* 2. RESTORED COMPACT CONTAINER: Matches grid height better */}
+            <div className='h-64 md:h-72 shrink-0 mt-2'>
+              <HomepageReviews />
             </div>
-            <div className='mt-4 pb-12 border-t border-rose-100/50 pt-8'>
+
+            <div className='pb-12 border-t border-rose-100/50 pt-8'>
               <ContentSections />
             </div>
           </div>

@@ -1,14 +1,15 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Star, Quote } from 'lucide-react';
+import { Star, Quote, CheckCircle2 } from 'lucide-react'; // Added CheckCircle2 import
 import { client } from '@/sanity/lib/client';
 import useEmblaCarousel from 'embla-carousel-react';
 import Autoplay from 'embla-carousel-autoplay';
 
 export default function ServicePageReviews() {
   const [reviews, setReviews] = useState([]);
-  // Setup Embla Carousel with the Autoplay plugin
+
+  // Carousel settings: align 'start' lets us show multiple cards cleanly
   const [emblaRef] = useEmblaCarousel({ loop: true, align: 'start', skipSnaps: false }, [
     Autoplay({ delay: 5000, stopOnInteraction: false }),
   ]);
@@ -16,7 +17,6 @@ export default function ServicePageReviews() {
   useEffect(() => {
     const fetchReviews = async () => {
       try {
-        // Fetch the 10 most recent 5-star reviews for a curated "wall of love"
         const data = await client.fetch(
           `*[_type == "review" && stars == 5] | order(date desc)[0...10] {
             "id": _id, author, stars, text, date
@@ -30,58 +30,55 @@ export default function ServicePageReviews() {
     fetchReviews();
   }, []);
 
-  if (reviews.length === 0) {
-    return null;
-  }
+  if (reviews.length === 0) return null;
 
   return (
-    <section className='py-24 bg-rose-50 overflow-hidden'>
+    <section className='py-16 bg-rose-50/50 border-y border-rose-100/50 overflow-hidden'>
       <div className='max-w-7xl mx-auto px-6'>
-        <div className='text-center mb-16'>
-          <span className='text-rose-500 font-bold tracking-widest text-sm uppercase block mb-3'>
-            Customer Success Stories
-          </span>
-          <h2 className='text-4xl md:text-5xl font-bold text-rose-950'>
-            Trusted by Your Neighbors
-          </h2>
+        {/* Header - More compact */}
+        <div className='flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4'>
+          <div>
+            <span className='text-rose-500 font-bold tracking-widest text-xs uppercase block mb-2'>
+              Customer Success Stories
+            </span>
+            <h2 className='text-3xl font-bold text-rose-950'>Trusted by Your Neighbors</h2>
+          </div>
+          {/* Decorative line or subtext could go here */}
+          <div className='hidden md:block h-px flex-1 bg-rose-200/50 ml-8 mb-4'></div>
         </div>
 
         {/* Carousel Viewport */}
         <div className='overflow-hidden cursor-grab active:cursor-grabbing' ref={emblaRef}>
-          {/* Carousel Container */}
-          <div className='flex gap-6 touch-pan-y ml-[-1rem]'>
+          <div className='flex gap-4 touch-pan-y ml-[-0.5rem]'>
             {reviews.map((review) => (
-              // Individual Review Card (adjust width for different screens)
+              // CARD CONTAINER: Adjusted width breakpoints for better density
               <div
                 key={review.id}
-                className='flex-[0_0_85%] md:flex-[0_0_45%] lg:flex-[0_0_30%] min-w-0 pl-4 relative'
+                className='flex-[0_0_85%] md:flex-[0_0_45%] lg:flex-[0_0_32%] min-w-0 pl-4 relative'
               >
-                <div className='h-full bg-white p-8 rounded-[32px] shadow-xl shadow-rose-100/50 border border-rose-100 flex flex-col relative hover:-translate-y-1 transition-transform duration-300'>
-                  {/* Decorative Quote Icon */}
-                  <Quote className='absolute top-6 right-6 w-12 h-12 text-rose-50 rotate-180 fill-rose-50' />
-
-                  {/* Stars */}
-                  <div className='flex gap-1 mb-6 relative z-10'>
-                    {[...Array(review.stars)].map((_, i) => (
-                      <Star
-                        key={i}
-                        className='w-5 h-5 text-orange-400 fill-orange-400 drop-shadow-sm'
-                      />
-                    ))}
+                <div className='h-full bg-white p-6 rounded-2xl shadow-sm border border-rose-100 flex flex-col hover:border-rose-300 transition-colors duration-300'>
+                  {/* Top Row: Stars & Icon */}
+                  <div className='flex justify-between items-start mb-4'>
+                    <div className='flex gap-1'>
+                      {[...Array(review.stars)].map((_, i) => (
+                        <Star key={i} className='w-4 h-4 text-orange-400 fill-orange-400' />
+                      ))}
+                    </div>
+                    <Quote className='w-8 h-8 text-rose-50 rotate-180 fill-rose-50' />
                   </div>
 
-                  {/* Review Text */}
-                  <blockquote className='flex-1 relative z-10'>
-                    <p className='text-rose-950/80 text-lg leading-relaxed italic'>
+                  {/* Review Text - clamped to 5 lines maximum */}
+                  <blockquote className='flex-1 mb-6'>
+                    <p className='text-slate-600 text-base leading-relaxed line-clamp-5'>
                       "{review.text}"
                     </p>
                   </blockquote>
 
-                  {/* Author Info */}
-                  <div className='mt-8 pt-6 border-t border-rose-50 relative z-10'>
-                    <div className='font-bold text-rose-950 text-lg'>{review.author}</div>
-                    <div className='text-rose-400 text-sm font-medium flex items-center gap-2'>
-                      <CheckCircle2 className='w-4 h-4' /> Verified Customer
+                  {/* Author Info - Compact */}
+                  <div className='pt-4 border-t border-slate-50 flex items-center justify-between'>
+                    <div className='font-bold text-slate-900 text-sm'>{review.author}</div>
+                    <div className='flex items-center gap-1.5 text-xs font-medium text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full'>
+                      <CheckCircle2 className='w-3 h-3' /> Verified
                     </div>
                   </div>
                 </div>
@@ -91,23 +88,5 @@ export default function ServicePageReviews() {
         </div>
       </div>
     </section>
-  );
-}
-
-// Simple icon component for the author section
-function CheckCircle2({ className }) {
-  return (
-    <svg
-      xmlns='http://www.w3.org/2000/svg'
-      viewBox='0 0 24 24'
-      fill='currentColor'
-      className={className}
-    >
-      <path
-        fillRule='evenodd'
-        d='M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm13.36-1.814a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z'
-        clipRule='evenodd'
-      />
-    </svg>
   );
 }

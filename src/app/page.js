@@ -12,6 +12,8 @@ import {
   AlertTriangle,
   Star,
   ArrowRight,
+  Fan,
+  Wind,
 } from 'lucide-react';
 
 import SmartQuote from './components/SmartQuote';
@@ -25,6 +27,8 @@ const ICON_MAP = {
   Wrench: Wrench,
   AlertTriangle: AlertTriangle,
   Star: Star,
+  Fan: Fan,
+  Wind: Wind,
   Default: ArrowRight,
 };
 

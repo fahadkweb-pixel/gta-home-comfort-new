@@ -39,6 +39,26 @@ export default function Home() {
   const [currentView, setCurrentView] = useState('GRID');
   const [selectedIssue, setSelectedIssue] = useState(null);
 
+  // --- REF FOR SCROLLING ---
+  const quoteRef = useRef(null);
+
+  // --- SCROLL EFFECT ---
+  // When view changes to QUOTE, center the form in the viewport
+  useEffect(() => {
+    if (currentView === 'QUOTE' && quoteRef.current) {
+      // Small timeout ensures the DOM is fully rendered before scrolling
+      setTimeout(() => {
+        quoteRef.current.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center', // <--- This centers it vertically
+          inline: 'center',
+        });
+      }, 100);
+    } else if (currentView === 'GRID') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [currentView]);
+
   const handleIssueSelect = useCallback((tileLabel) => {
     setSelectedIssue(tileLabel);
     setCurrentView('QUOTE');
@@ -111,7 +131,6 @@ export default function Home() {
                   tiles.map((tile, idx) => {
                     const IconComponent = ICON_MAP[tile.icon] || ICON_MAP['Default'];
 
-                    // --- THEME LOGIC: Icons get the color, Cards stay neutral ---
                     const getTheme = (variant) => {
                       const baseCard = 'bg-white border-slate-200 hover:border-slate-300';
 
@@ -162,13 +181,11 @@ export default function Home() {
                     };
                     const theme = getTheme(tile.variant);
 
-                    // --- HEIGHT LOGIC (Tightened for Mobile/Desktop balance) ---
                     const isTall = tile.layout?.includes('row-span-2');
                     const heightClass = isTall ? 'h-80 md:h-96' : 'h-60 md:h-72';
-
                     const fontWeight = tile.labelBold === false ? 'font-medium' : 'font-semibold';
-
                     const forceDarkText = !!tile.backgroundImage;
+
                     const getTextColor = (colorOption) => {
                       if (forceDarkText) return { main: 'text-slate-900', sub: 'text-slate-500' };
                       switch (colorOption) {
@@ -196,10 +213,8 @@ export default function Home() {
                           ${theme.card} ${heightClass}
                         `}
                       >
-                        {/* --- SCENARIO A: SPLIT CARD (Has Image) --- */}
                         {tile.backgroundImage ? (
                           <>
-                            {/* TOP IMAGE AREA (60% Height - Object Cover) */}
                             <div className='relative h-[60%] w-full overflow-hidden bg-white'>
                               <img
                                 src={urlFor(tile.backgroundImage).width(600).url()}
@@ -207,7 +222,6 @@ export default function Home() {
                                 className='w-full h-full object-cover transition-transform duration-700 group-hover:scale-105'
                               />
                               <div className='absolute top-4 left-4 z-10'>
-                                {/* Image Overlay Icon: Keep white bg for contrast, apply colored text */}
                                 <div className='w-10 h-10 rounded-2xl bg-white/95 backdrop-blur-sm shadow-sm flex items-center justify-center border border-slate-100'>
                                   <IconComponent
                                     size={20}
@@ -217,8 +231,6 @@ export default function Home() {
                                 </div>
                               </div>
                             </div>
-
-                            {/* BOTTOM TEXT AREA (40% Height - Balanced) */}
                             <div className='relative h-[40%] w-full px-5 flex flex-col justify-center bg-inherit border-t border-slate-50'>
                               <span
                                 className={`block ${fontWeight} text-lg md:text-xl tracking-tight leading-none ${textStyle.main}`}
@@ -241,10 +253,8 @@ export default function Home() {
                             </div>
                           </>
                         ) : (
-                          /* --- SCENARIO B: STANDARD CARD --- */
                           <div className='w-full h-full p-6 flex flex-col justify-between'>
                             <div className='flex justify-between items-start w-full'>
-                              {/* Standard Icon: Apply the colored box style here */}
                               <div
                                 className={`
                                 w-12 h-12 rounded-2xl shadow-sm flex items-center justify-center
@@ -263,7 +273,6 @@ export default function Home() {
                                 className={`opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 ${theme.iconText}`}
                               />
                             </div>
-
                             <div>
                               <span
                                 className={`block ${fontWeight} text-xl md:text-2xl tracking-tight leading-none ${textStyle.main}`}
@@ -296,9 +305,12 @@ export default function Home() {
           </div>
         )}
 
-        {/* FIX APPLIED: Removed bg-white, rounded-3xl, shadow-2xl to fix double-box issue */}
         {currentView === 'QUOTE' && (
-          <div className='flex-1 z-20 animate-in slide-in-from-right duration-300 min-h-[600px] flex items-center'>
+          // ATTACH REF HERE
+          <div
+            ref={quoteRef}
+            className='flex-1 z-20 animate-in slide-in-from-right duration-300 min-h-[600px] flex items-center py-10'
+          >
             <div className='w-full'>
               <SmartQuote issueType={selectedIssue} onBack={goToGrid} />
             </div>

@@ -13,7 +13,6 @@ import {
   Phone,
   Info,
   Mail,
-  MessageSquare,
 } from 'lucide-react';
 
 const SERVICES = [
@@ -123,12 +122,7 @@ export default function Navbar() {
               About
             </Link>
 
-            <Link
-              href='/#reviews'
-              className='text-sm font-bold text-slate-600 hover:text-rose-500 transition-colors'
-            >
-              Reviews
-            </Link>
+            {/* REMOVED REVIEWS LINK HERE */}
 
             <Link
               href='/contact'
@@ -213,14 +207,7 @@ export default function Navbar() {
                 <Mail size={20} className='text-rose-400' />
                 Contact
               </Link>
-              <Link
-                href='/#reviews'
-                onClick={() => setIsOpen(false)}
-                className='flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 text-slate-700 font-bold'
-              >
-                <MessageSquare size={20} className='text-rose-400' />
-                Reviews
-              </Link>
+              {/* REMOVED REVIEWS LINK HERE */}
             </div>
           </div>
 

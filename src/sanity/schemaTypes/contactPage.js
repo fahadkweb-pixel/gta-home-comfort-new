@@ -14,6 +14,8 @@ export const contactPage = defineType({
     // CONTACT DETAILS
     defineField({ name: 'phoneNumber', title: 'Phone Number', type: 'string' }),
     defineField({ name: 'email', title: 'Email Address', type: 'string' }),
+
+    // --- MAP SECTION ---
     defineField({
       name: 'serviceAreaTitle',
       title: 'Service Area Title',
@@ -27,7 +29,16 @@ export const contactPage = defineType({
       rows: 3,
     }),
 
-    // TRIAGE CARDS (Emergency, Quote, General)
+    // *** NEW FIELD: MAP IMAGE ***
+    defineField({
+      name: 'serviceAreaImage',
+      title: 'Map Image',
+      type: 'image',
+      options: { hotspot: true },
+      description: 'Upload a screenshot of your service area map here.',
+    }),
+
+    // TRIAGE CARDS
     defineField({ name: 'emergencyCardText', title: 'Emergency Card Text', type: 'text', rows: 2 }),
     defineField({ name: 'quoteCardText', title: 'Quote Card Text', type: 'text', rows: 2 }),
     defineField({

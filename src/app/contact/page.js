@@ -1,4 +1,5 @@
 import { client } from '@/sanity/lib/client';
+import { urlFor } from '@/sanity/lib/image'; // <--- 1. Import urlFor
 import Link from 'next/link';
 import { Phone, Mail, MapPin, Calculator, ArrowRight } from 'lucide-react';
 
@@ -84,11 +85,23 @@ export default async function ContactPage() {
               <span>Serving the Entire GTA</span>
             </div>
           </div>
-          <div className='flex-1 w-full h-64 bg-rose-200/50 rounded-2xl flex items-center justify-center overflow-hidden relative'>
-            <div className='absolute inset-0 bg-rose-500/10'></div>
-            <span className='text-rose-400 font-bold text-xl uppercase tracking-widest'>
-              (Map Placeholder)
-            </span>
+
+          {/* 2. DYNAMIC MAP IMAGE LOGIC */}
+          <div className='flex-1 w-full h-64 bg-rose-200/50 rounded-2xl flex items-center justify-center overflow-hidden relative shadow-inner'>
+            {data.serviceAreaImage ? (
+              <img
+                src={urlFor(data.serviceAreaImage).url()}
+                alt='Service Area Map'
+                className='w-full h-full object-cover'
+              />
+            ) : (
+              <>
+                <div className='absolute inset-0 bg-rose-500/10'></div>
+                <span className='text-rose-400 font-bold text-xl uppercase tracking-widest'>
+                  (Map Placeholder)
+                </span>
+              </>
+            )}
           </div>
         </div>
       </div>

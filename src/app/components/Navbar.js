@@ -1,7 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react'; // Added useEffect
 import Link from 'next/link';
+import { client } from '@/sanity/lib/client'; // Import Client
+import { urlFor } from '@/sanity/lib/image'; // Import Image Builder
 import {
   Menu,
   X,
@@ -52,24 +54,52 @@ const SERVICES = [
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
+  const [logoData, setLogoData] = useState(null); // State for the logo
+
+  // Fetch the logo on component mount
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const data = await client.fetch(`*[_type == "settings"][0]{ logo, companyName }`);
+        setLogoData(data);
+      } catch (error) {
+        console.error('Failed to fetch settings:', error);
+      }
+    };
+    fetchSettings();
+  }, []);
 
   return (
     <nav className='sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-rose-100'>
       <div className='max-w-7xl mx-auto px-6'>
         <div className='flex justify-between items-center h-20'>
-          {/* 1. LOGO */}
+          {/* 1. LOGO LOGIC */}
           <Link href='/' className='flex items-center gap-2 group'>
-            <div className='w-10 h-10 bg-rose-500 rounded-xl flex items-center justify-center text-white shadow-lg shadow-rose-500/20 group-hover:scale-105 transition-transform'>
-              <Flame size={24} fill='white' />
-            </div>
-            <div className='flex flex-col'>
-              <span className='font-bold text-slate-900 text-lg leading-none tracking-tight'>
-                GTA Home
-              </span>
-              <span className='text-rose-500 font-bold text-sm leading-none tracking-widest uppercase'>
-                Comfort
-              </span>
-            </div>
+            {logoData?.logo ? (
+              // A: Render Uploaded Image if available
+              <div className='relative h-12 w-auto min-w-[120px]'>
+                <img
+                  src={urlFor(logoData.logo).height(100).url()}
+                  alt={logoData.companyName || 'Company Logo'}
+                  className='h-full w-auto object-contain'
+                />
+              </div>
+            ) : (
+              // B: Fallback to Code Logo (The Flame)
+              <>
+                <div className='w-10 h-10 bg-rose-500 rounded-xl flex items-center justify-center text-white shadow-lg shadow-rose-500/20 group-hover:scale-105 transition-transform'>
+                  <Flame size={24} fill='white' />
+                </div>
+                <div className='flex flex-col'>
+                  <span className='font-bold text-slate-900 text-lg leading-none tracking-tight'>
+                    GTA Home
+                  </span>
+                  <span className='text-rose-500 font-bold text-sm leading-none tracking-widest uppercase'>
+                    Comfort
+                  </span>
+                </div>
+              </>
+            )}
           </Link>
 
           {/* 2. DESKTOP NAVIGATION */}
@@ -91,7 +121,6 @@ export default function Navbar() {
                 />
               </button>
 
-              {/* The Dropdown Card */}
               <div className='absolute top-full left-1/2 -translate-x-1/2 w-[340px] bg-white rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-100 p-2 opacity-0 translate-y-2 invisible group-hover:opacity-100 group-hover:translate-y-0 group-hover:visible transition-all duration-200 ease-out'>
                 {SERVICES.map((service) => (
                   <Link
@@ -121,8 +150,6 @@ export default function Navbar() {
             >
               About
             </Link>
-
-            {/* REMOVED REVIEWS LINK HERE */}
 
             <Link
               href='/contact'
@@ -158,10 +185,10 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* 5. MOBILE MENU (Slide Down) */}
+      {/* 5. MOBILE MENU */}
       {isOpen && (
         <div className='md:hidden absolute top-20 left-0 w-full bg-white border-b border-slate-100 shadow-xl flex flex-col p-4 animate-in slide-in-from-top-5 duration-200 h-[calc(100vh-80px)] overflow-y-auto'>
-          {/* Mobile Services List */}
+          {/* Services */}
           <div className='mb-6'>
             <div className='text-xs font-bold text-slate-400 uppercase tracking-widest mb-4 px-2'>
               Services
@@ -185,7 +212,7 @@ export default function Navbar() {
             </div>
           </div>
 
-          {/* Mobile Company Links */}
+          {/* Company */}
           <div className='mb-6 border-t border-slate-100 pt-6'>
             <div className='text-xs font-bold text-slate-400 uppercase tracking-widest mb-4 px-2'>
               Company
@@ -207,11 +234,10 @@ export default function Navbar() {
                 <Mail size={20} className='text-rose-400' />
                 Contact
               </Link>
-              {/* REMOVED REVIEWS LINK HERE */}
             </div>
           </div>
 
-          {/* Mobile CTA */}
+          {/* CTA */}
           <div className='mt-auto pb-8'>
             <a
               href='tel:4166782131'

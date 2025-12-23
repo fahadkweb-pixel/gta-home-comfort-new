@@ -3,9 +3,8 @@ import { urlFor } from '@/sanity/lib/image';
 import { Wrench, Hammer, ArrowRight, HelpCircle } from 'lucide-react';
 import { PortableText } from '@portabletext/react';
 import Link from 'next/link';
-// REMOVED: import Navbar from '../components/Navbar'; // <-- Fixed double nav
-// REMOVED: import Footer from '../components/Footer'; // <-- Fixed double footer
-import ServicePageReviews from '../components/ServicePageReviews'; // <-- Import new component
+// Navbar/Footer handled by global layout
+import ServicePageReviews from '../components/ServicePageReviews';
 
 async function getPage(slug) {
   return client.fetch(`*[_type == "servicePage" && slug.current == $slug][0]`, { slug });
@@ -24,8 +23,6 @@ export default async function ServicePage({ params }) {
 
   return (
     <main className='min-h-screen bg-[#FDF8F6] text-rose-950 selection:bg-rose-200'>
-      {/* Navbar is now handled by the global layout.js */}
-
       {/* 1. HERO */}
       <section className='relative h-[55vh] flex items-center justify-center overflow-hidden bg-rose-900'>
         {page.heroImage && (
@@ -48,7 +45,7 @@ export default async function ServicePage({ params }) {
         </div>
       </section>
 
-      {/* 2. REPAIR VS REPLACE */}
+      {/* 2. REPAIR VS REPLACE (UPDATED LINKS) */}
       {page.showSplitSection && (
         <section className='relative z-20 -mt-20 max-w-5xl mx-auto px-6 grid md:grid-cols-2 gap-6 mb-20'>
           <div className='bg-white p-8 rounded-[32px] shadow-xl shadow-rose-900/10 border border-white/50 hover:-translate-y-1 transition-transform duration-300'>
@@ -57,8 +54,9 @@ export default async function ServicePage({ params }) {
             </div>
             <h3 className='text-2xl font-bold mb-2'>{page.repairTitle}</h3>
             <p className='text-rose-900/70 mb-6 h-12'>{page.repairText}</p>
+            {/* DYNAMIC LINK: REPAIR */}
             <Link
-              href='/'
+              href={`/?mode=repair&source=${slug}`}
               className='text-rose-600 font-bold flex items-center gap-2 hover:gap-4 transition-all'
             >
               Book Repair <ArrowRight size={20} />
@@ -71,8 +69,9 @@ export default async function ServicePage({ params }) {
             </div>
             <h3 className='text-2xl font-bold mb-2'>{page.installTitle}</h3>
             <p className='text-rose-200/80 mb-6 h-12'>{page.installText}</p>
+            {/* DYNAMIC LINK: INSTALL */}
             <Link
-              href='/'
+              href={`/?mode=install&source=${slug}`}
               className='text-white font-bold flex items-center gap-2 hover:gap-4 transition-all relative z-10'
             >
               Get Quote <ArrowRight size={20} />
@@ -112,7 +111,7 @@ export default async function ServicePage({ params }) {
         </section>
       )}
 
-      {/* 5. NEW REDESIGNED REVIEWS SECTION */}
+      {/* 5. REVIEWS */}
       {page.showReviews && <ServicePageReviews />}
 
       {/* 6. FAQ */}
@@ -138,7 +137,7 @@ export default async function ServicePage({ params }) {
         </section>
       )}
 
-      {/* CTA Banner */}
+      {/* CTA Banner (UPDATED LINK) */}
       <section className='bg-rose-950 py-20 text-center text-white relative overflow-hidden'>
         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-5"></div>
         <div className='relative z-10 max-w-2xl mx-auto px-6'>
@@ -147,15 +146,13 @@ export default async function ServicePage({ params }) {
             Use our smart diagnostic tool to get the right help, right away.
           </p>
           <Link
-            href='/'
+            href={`/?mode=repair&source=${slug}`}
             className='inline-flex items-center gap-2 bg-white hover:bg-rose-50 text-rose-600 font-bold py-4 px-8 rounded-2xl shadow-lg transition-all hover:-translate-y-0.5'
           >
             Launch Diagnostic Tool <ArrowRight className='w-5 h-5' />
           </Link>
         </div>
       </section>
-
-      {/* Footer is now handled by the global layout.js */}
     </main>
   );
 }

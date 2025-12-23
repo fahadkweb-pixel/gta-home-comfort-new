@@ -19,6 +19,8 @@ import {
   Mail,
   Fan,
   MapPin,
+  RefreshCw, // Icon for Replace
+  PlusCircle, // Icon for New Install
 } from 'lucide-react';
 import { PopupModal } from 'react-calendly';
 import GooglePlacesAutocomplete from 'react-google-places-autocomplete';
@@ -27,6 +29,8 @@ import GooglePlacesAutocomplete from 'react-google-places-autocomplete';
 
 const getCategory = (label) => {
   const l = label?.toLowerCase() || '';
+  if (l.includes('install') || l.includes('new') || l.includes('replace') || l.includes('quote'))
+    return 'INSTALLATION';
   if (
     l.includes('purif') ||
     l.includes('humid') ||
@@ -41,6 +45,12 @@ const getCategory = (label) => {
 };
 
 const SYSTEM_OPTIONS = {
+  INSTALLATION: [
+    { id: 'FURNACE', label: 'New Furnace', icon: <Flame className='text-orange-500' /> },
+    { id: 'AC', label: 'New A/C', icon: <Snowflake className='text-blue-400' /> },
+    { id: 'HEATPUMP', label: 'New Heat Pump', icon: <Wind className='text-emerald-500' /> },
+    { id: 'TANKLESS', label: 'Tankless Water Heater', icon: <Zap className='text-yellow-500' /> },
+  ],
   HEATING: [
     { id: 'FURNACE', label: 'Furnace', icon: <Flame className='text-orange-500' /> },
     { id: 'BOILER', label: 'Boiler', icon: <Droplets className='text-blue-500' /> },
@@ -78,6 +88,23 @@ const SYSTEM_OPTIONS = {
 };
 
 const ISSUE_OPTIONS = {
+  // --- UPDATED INSTALLATION OPTIONS ---
+  INSTALLATION_TYPE: [
+    {
+      id: 'REPLACE',
+      label: 'Replace Existing System',
+      desc: 'Swapping out an old unit',
+      icon: <RefreshCw className='text-blue-500' />,
+    },
+    {
+      id: 'NEW_INSTALL',
+      label: 'Install New System',
+      desc: 'Adding a unit where none exists',
+      icon: <PlusCircle className='text-emerald-500' />,
+    },
+    { id: 'NOT_SURE', label: 'Not Sure / Other', desc: 'I need a professional opinion' },
+  ],
+  // ------------------------------------
   DEFAULT: [
     { id: 'BROKEN', label: 'Not Working', desc: "System won't turn on" },
     { id: 'NOISE', label: 'Weird Noise', desc: 'Banging, humming, or clicking' },
@@ -119,14 +146,19 @@ const ISSUE_OPTIONS = {
 };
 
 export default function SmartQuote({ issueType, onBack }) {
-  const [view, setView] = useState('SAFETY');
+  // 1. CALCULATE CATEGORY IMMEDIATELY
+  const initialCategory = useMemo(() => getCategory(issueType), [issueType]);
+
+  // 2. SET INITIAL VIEW: Bypass SAFETY if it's an Installation
+  const [view, setView] = useState(initialCategory === 'INSTALLATION' ? 'WIZARD' : 'SAFETY');
+
   const [isUnsafe, setIsUnsafe] = useState(false);
   const [overrideEmergency, setOverrideEmergency] = useState(false);
   const [step, setStep] = useState(1);
   const TOTAL_STEPS = 3;
 
   const [formData, setFormData] = useState({
-    category: getCategory(issueType),
+    category: initialCategory,
     system: '',
     issue: '',
     issueLabel: '',
@@ -142,8 +174,38 @@ export default function SmartQuote({ issueType, onBack }) {
   );
 
   const currentIssues = useMemo(() => {
+    if (formData.category === 'INSTALLATION') {
+      return ISSUE_OPTIONS.INSTALLATION_TYPE;
+    }
     return ISSUE_OPTIONS[formData.system] || ISSUE_OPTIONS.DEFAULT;
-  }, [formData.system]);
+  }, [formData.system, formData.category]);
+
+  // 3. UPDATED TITLES
+  const getStepTitle = () => {
+    if (step === 1) {
+      return formData.category === 'INSTALLATION'
+        ? 'What are we installing?'
+        : 'Which system do you have?';
+    }
+    if (step === 2) {
+      return formData.category === 'INSTALLATION'
+        ? 'Installation Type'
+        : 'What seems to be the problem?';
+    }
+    return 'Almost done.';
+  };
+
+  const getStepSubtitle = () => {
+    if (step === 1)
+      return formData.category === 'INSTALLATION'
+        ? 'Select the new equipment needed.'
+        : 'Select the equipment that needs service.';
+    if (step === 2)
+      return formData.category === 'INSTALLATION'
+        ? 'Is this a replacement or a new addition?'
+        : 'This helps us prepare the right parts.';
+    return 'Where should we send the booking confirmation?';
+  };
 
   const handleNext = (key, value, extraLabel = '') => {
     setFormData((prev) => ({
@@ -167,7 +229,13 @@ export default function SmartQuote({ issueType, onBack }) {
     if (step > 1) {
       setStep((prev) => prev - 1);
     } else {
-      onBack();
+      // If we skipped safety, going back from Step 1 should exit to Home
+      if (formData.category === 'INSTALLATION') {
+        onBack();
+      } else {
+        // Otherwise go back to Safety check
+        setView('SAFETY');
+      }
     }
   };
 
@@ -309,10 +377,8 @@ export default function SmartQuote({ issueType, onBack }) {
           {step === 1 && (
             <div className='animate-in slide-in-from-right-8 duration-500 space-y-6'>
               <div className='text-center'>
-                <h2 className='text-3xl font-bold text-rose-950 mb-3'>Which system do you have?</h2>
-                <p className='text-rose-900/60 font-medium'>
-                  Select the equipment that needs service.
-                </p>
+                <h2 className='text-3xl font-bold text-rose-950 mb-3'>{getStepTitle()}</h2>
+                <p className='text-rose-900/60 font-medium'>{getStepSubtitle()}</p>
               </div>
               <div className='grid grid-cols-1 sm:grid-cols-2 gap-3'>
                 {currentSystems.map((opt) => (
@@ -330,12 +396,8 @@ export default function SmartQuote({ issueType, onBack }) {
           {step === 2 && (
             <div className='animate-in slide-in-from-right-8 duration-500 space-y-6'>
               <div className='text-center'>
-                <h2 className='text-3xl font-bold text-rose-950 mb-3'>
-                  What seems to be the problem?
-                </h2>
-                <p className='text-rose-900/60 font-medium'>
-                  This helps us prepare the right parts.
-                </p>
+                <h2 className='text-3xl font-bold text-rose-950 mb-3'>{getStepTitle()}</h2>
+                <p className='text-rose-900/60 font-medium'>{getStepSubtitle()}</p>
               </div>
               <div className='grid grid-cols-1 sm:grid-cols-2 gap-3'>
                 {currentIssues.map((opt) => (
@@ -343,6 +405,7 @@ export default function SmartQuote({ issueType, onBack }) {
                     key={opt.id}
                     title={opt.label}
                     desc={opt.desc}
+                    icon={opt.icon} // Pass icon here
                     onClick={() => handleNext('issue', opt.id, opt.label)}
                   />
                 ))}
@@ -377,7 +440,7 @@ export default function SmartQuote({ issueType, onBack }) {
                   <MapPin className='absolute left-4 top-[18px] z-10 w-5 h-5 text-rose-300' />
                   <div className='google-places-autocomplete-wrapper'>
                     <GooglePlacesAutocomplete
-                      apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY} // <--- SECURE ENV VARIABLE
+                      apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY}
                       selectProps={{
                         value: formData.address
                           ? { label: formData.address, value: formData.address }

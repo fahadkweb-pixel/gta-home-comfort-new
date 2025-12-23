@@ -1,13 +1,17 @@
 import { reviewType } from './review';
 import { tileType } from './tile';
 import { homepageType } from './homepage';
-import { servicePage } from './servicePage'; // <--- NEW IMPORT
+import { servicePage } from './servicePage';
+import { aboutPage } from './aboutPage'; // <--- NEW
+import { contactPage } from './contactPage'; // <--- NEW
 
 export const schema = {
   types: [
     reviewType,
     tileType,
     homepageType,
-    servicePage, // <--- ADDED HERE
+    servicePage,
+    aboutPage, // <--- ADDED
+    contactPage, // <--- ADDED
   ],
 };

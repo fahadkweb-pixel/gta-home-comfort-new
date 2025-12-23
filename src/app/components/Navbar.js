@@ -2,7 +2,19 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Menu, X, ChevronDown, Flame, Snowflake, Droplets, Wind, Phone } from 'lucide-react';
+import {
+  Menu,
+  X,
+  ChevronDown,
+  Flame,
+  Snowflake,
+  Droplets,
+  Wind,
+  Phone,
+  Info,
+  Mail,
+  MessageSquare,
+} from 'lucide-react';
 
 const SERVICES = [
   {
@@ -41,7 +53,6 @@ const SERVICES = [
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
-  const [mobileServicesOpen, setMobileServicesOpen] = useState(true); // Default open on mobile for easier access
 
   return (
     <nav className='sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-rose-100'>
@@ -71,7 +82,7 @@ export default function Navbar() {
               Home
             </Link>
 
-            {/* DROPDOWN MENU */}
+            {/* SERVICES DROPDOWN */}
             <div className='relative group'>
               <button className='flex items-center gap-1 text-sm font-bold text-slate-600 group-hover:text-rose-500 transition-colors py-8'>
                 Services
@@ -106,10 +117,24 @@ export default function Navbar() {
             </div>
 
             <Link
+              href='/about'
+              className='text-sm font-bold text-slate-600 hover:text-rose-500 transition-colors'
+            >
+              About
+            </Link>
+
+            <Link
               href='/#reviews'
               className='text-sm font-bold text-slate-600 hover:text-rose-500 transition-colors'
             >
               Reviews
+            </Link>
+
+            <Link
+              href='/contact'
+              className='text-sm font-bold text-slate-600 hover:text-rose-500 transition-colors'
+            >
+              Contact
             </Link>
           </div>
 
@@ -141,7 +166,7 @@ export default function Navbar() {
 
       {/* 5. MOBILE MENU (Slide Down) */}
       {isOpen && (
-        <div className='md:hidden absolute top-20 left-0 w-full bg-white border-b border-slate-100 shadow-xl flex flex-col p-4 animate-in slide-in-from-top-5 duration-200'>
+        <div className='md:hidden absolute top-20 left-0 w-full bg-white border-b border-slate-100 shadow-xl flex flex-col p-4 animate-in slide-in-from-top-5 duration-200 h-[calc(100vh-80px)] overflow-y-auto'>
           {/* Mobile Services List */}
           <div className='mb-6'>
             <div className='text-xs font-bold text-slate-400 uppercase tracking-widest mb-4 px-2'>
@@ -152,7 +177,7 @@ export default function Navbar() {
                 <Link
                   key={service.name}
                   href={service.href}
-                  onClick={() => setIsOpen(false)} // Close menu on click
+                  onClick={() => setIsOpen(false)}
                   className='flex items-center gap-4 p-3 rounded-xl hover:bg-slate-50 border border-transparent hover:border-slate-100 transition-all'
                 >
                   <div
@@ -166,7 +191,41 @@ export default function Navbar() {
             </div>
           </div>
 
-          <div className='border-t border-slate-100 pt-6 pb-2'>
+          {/* Mobile Company Links */}
+          <div className='mb-6 border-t border-slate-100 pt-6'>
+            <div className='text-xs font-bold text-slate-400 uppercase tracking-widest mb-4 px-2'>
+              Company
+            </div>
+            <div className='space-y-2'>
+              <Link
+                href='/about'
+                onClick={() => setIsOpen(false)}
+                className='flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 text-slate-700 font-bold'
+              >
+                <Info size={20} className='text-rose-400' />
+                About Us
+              </Link>
+              <Link
+                href='/contact'
+                onClick={() => setIsOpen(false)}
+                className='flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 text-slate-700 font-bold'
+              >
+                <Mail size={20} className='text-rose-400' />
+                Contact
+              </Link>
+              <Link
+                href='/#reviews'
+                onClick={() => setIsOpen(false)}
+                className='flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 text-slate-700 font-bold'
+              >
+                <MessageSquare size={20} className='text-rose-400' />
+                Reviews
+              </Link>
+            </div>
+          </div>
+
+          {/* Mobile CTA */}
+          <div className='mt-auto pb-8'>
             <a
               href='tel:4166782131'
               className='flex items-center justify-center gap-3 w-full bg-rose-500 text-white font-bold py-4 rounded-xl shadow-lg shadow-rose-500/20 active:scale-95 transition-transform'

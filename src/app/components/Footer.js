@@ -7,7 +7,7 @@ export default function Footer() {
   return (
     <footer className='w-full bg-rose-950 text-rose-100/80 pt-16 pb-8 border-t border-rose-900 mt-auto'>
       <div className='max-w-5xl mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-12 mb-16'>
-        {/* BRAND COLUMN (Takes up 2/3 width on desktop) */}
+        {/* BRAND COLUMN */}
         <div className='col-span-1 md:col-span-2 space-y-6'>
           <Link
             href='/'
@@ -54,10 +54,10 @@ export default function Footer() {
           <ul className='space-y-4 text-sm md:text-right'>
             <li>
               <a
-                href='tel:4165550199'
+                href='tel:4166782131'
                 className='text-3xl font-bold text-white hover:text-rose-400 transition-colors block tracking-tight'
               >
-                416-555-0199
+                416-678-2131
               </a>
               <span className='text-xs text-rose-400 block mt-1'>24/7 Direct Line</span>
             </li>
@@ -97,7 +97,6 @@ export default function Footer() {
   );
 }
 
-// Helper for consistent social links
 function SocialLink({ href, icon, label }) {
   return (
     <a

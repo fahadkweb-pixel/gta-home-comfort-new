@@ -18,10 +18,9 @@ import {
   User,
   Mail,
   Fan,
-  MapPin, // New Icon
+  MapPin,
 } from 'lucide-react';
 import { PopupModal } from 'react-calendly';
-import GooglePlacesAutocomplete from 'react-google-places-autocomplete'; // 1. IMPORT AUTOCOMPLETE
 
 // --- CONFIGURATION: LOGIC MAPS ---
 
@@ -133,7 +132,7 @@ export default function SmartQuote({ issueType, onBack }) {
     name: '',
     phone: '',
     email: '',
-    address: '', // <--- 2. NEW FIELD
+    address: '',
   });
 
   const currentSystems = useMemo(
@@ -371,38 +370,17 @@ export default function SmartQuote({ issueType, onBack }) {
                 }}
                 className='space-y-4'
               >
-                {/* 4. ADDRESS FIELD WITH AUTOCOMPLETE */}
-                <div className='relative group z-50'>
-                  {/* z-50 is important for dropdowns */}
-                  <MapPin className='absolute left-4 top-[18px] z-10 w-5 h-5 text-rose-300' />
-                  <div className='google-places-autocomplete-wrapper'>
-                    <GooglePlacesAutocomplete
-                      apiKey='AIzaSyAhGz54LjrsTLwsOf6-b6K3Kh0AJOvJkQQ' // <--- REPLACE THIS
-                      selectProps={{
-                        value: formData.address
-                          ? { label: formData.address, value: formData.address }
-                          : null,
-                        onChange: (val) => setFormData((prev) => ({ ...prev, address: val.label })),
-                        placeholder: 'Service Address (Start Typing...)',
-                        styles: {
-                          // Minimalist styling to match your theme
-                          control: (provided) => ({
-                            ...provided,
-                            borderRadius: '1rem', // rounded-2xl
-                            border: '1px solid rgba(255, 255, 255, 0.4)',
-                            backgroundColor: 'rgba(255, 255, 255, 0.5)',
-                            paddingLeft: '40px', // Make room for icon
-                            paddingBlock: '6px',
-                            boxShadow: 'none',
-                            '&:hover': { borderColor: '#fecdd3' },
-                          }),
-                          input: (provided) => ({ ...provided, color: '#4c0519' }),
-                          placeholder: (provided) => ({ ...provided, color: '#fda4af' }),
-                          singleValue: (provided) => ({ ...provided, color: '#4c0519' }),
-                        },
-                      }}
-                    />
-                  </div>
+                {/* 4. ADDRESS FIELD REVERTED TO STANDARD INPUT */}
+                <div className='relative group'>
+                  <MapPin className='absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-rose-300' />
+                  <input
+                    type='text'
+                    placeholder='Service Address'
+                    value={formData.address}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, address: e.target.value }))}
+                    className='w-full p-4 pl-12 bg-white/50 border border-white/40 rounded-2xl text-rose-950 placeholder:text-rose-300 outline-none focus:bg-white focus:ring-2 focus:ring-rose-500/20 transition-all'
+                    required
+                  />
                 </div>
 
                 <div className='relative group'>
@@ -507,7 +485,6 @@ function BookingOutput({ contactData, onBack }) {
             email: contactData.email,
             firstName: contactData.name,
             smsReminderNumber: contactData.phone,
-            // 5. INJECT ADDRESS into Custom Answer 'a1' (Check your Calendly for exact mapping)
             customAnswers: {
               a1: contactData.address,
             },
@@ -533,11 +510,12 @@ function EmergencyOutput({ issueLabel, onBack, onBookAnyway }) {
         urgent. <br />
         Please call dispatch directly to bypass the online queue.
       </p>
+      {/* UPDATE PHONE NUMBER HERE */}
       <a
-        href='tel:4165550199'
+        href='tel:4166782131'
         className='block w-full bg-red-600 hover:bg-red-700 text-white font-bold py-5 rounded-2xl shadow-xl shadow-red-600/20 text-xl transition-all mb-4'
       >
-        Call Dispatch: 416-555-0199
+        Call Dispatch: 416-678-2131
       </a>
       <button
         onClick={onBookAnyway}

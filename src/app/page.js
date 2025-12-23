@@ -16,7 +16,6 @@ import {
 
 import SmartQuote from './components/SmartQuote';
 import ContentSections from './components/ContentSections';
-// Removed ControlTile import as it's not used here
 
 const ICON_MAP = {
   Flame: Flame,
@@ -108,42 +107,52 @@ export default function Home() {
                   tiles.map((tile, idx) => {
                     const IconComponent = ICON_MAP[tile.icon] || ICON_MAP['Default'];
 
+                    // --- THEME LOGIC: Icons get the color, Cards stay neutral ---
                     const getTheme = (variant) => {
+                      const baseCard = 'bg-white border-slate-200 hover:border-slate-300';
+
                       switch (variant) {
                         case 'orange':
                           return {
-                            card: 'bg-[#FFF8F6] border-orange-100 hover:border-orange-300',
-                            icon: 'text-orange-500',
+                            card: baseCard,
+                            iconBox: 'bg-orange-100 text-orange-600',
+                            iconText: 'text-orange-600',
                           };
                         case 'blue':
                           return {
-                            card: 'bg-blue-50/50 border-blue-100 hover:border-blue-300',
-                            icon: 'text-blue-500',
+                            card: baseCard,
+                            iconBox: 'bg-blue-100 text-blue-600',
+                            iconText: 'text-blue-600',
                           };
                         case 'rose':
                           return {
-                            card: 'bg-rose-50/50 border-rose-100 hover:border-rose-300',
-                            icon: 'text-rose-500',
+                            card: baseCard,
+                            iconBox: 'bg-rose-100 text-rose-600',
+                            iconText: 'text-rose-600',
                           };
                         case 'cyan':
                           return {
-                            card: 'bg-cyan-50/50 border-cyan-100 hover:border-cyan-300',
-                            icon: 'text-cyan-500',
+                            card: baseCard,
+                            iconBox: 'bg-cyan-100 text-cyan-600',
+                            iconText: 'text-cyan-600',
                           };
                         case 'purple':
                           return {
-                            card: 'bg-purple-50/50 border-purple-100 hover:border-purple-300',
-                            icon: 'text-purple-500',
+                            card: baseCard,
+                            iconBox: 'bg-purple-100 text-purple-600',
+                            iconText: 'text-purple-600',
                           };
                         case 'amber':
                           return {
-                            card: 'bg-amber-50/50 border-amber-100 hover:border-amber-300',
-                            icon: 'text-amber-500',
+                            card: baseCard,
+                            iconBox: 'bg-amber-100 text-amber-600',
+                            iconText: 'text-amber-600',
                           };
                         default:
                           return {
-                            card: 'bg-white border-slate-100 hover:border-slate-300',
-                            icon: 'text-slate-500',
+                            card: baseCard,
+                            iconBox: 'bg-slate-100 text-slate-600',
+                            iconText: 'text-slate-600',
                           };
                       }
                     };
@@ -194,11 +203,12 @@ export default function Home() {
                                 className='w-full h-full object-cover transition-transform duration-700 group-hover:scale-105'
                               />
                               <div className='absolute top-4 left-4 z-10'>
+                                {/* Image Overlay Icon: Keep white bg for contrast, apply colored text */}
                                 <div className='w-10 h-10 rounded-2xl bg-white/95 backdrop-blur-sm shadow-sm flex items-center justify-center border border-slate-100'>
                                   <IconComponent
                                     size={20}
                                     strokeWidth={2.5}
-                                    className={theme.icon}
+                                    className={theme.iconText}
                                   />
                                 </div>
                               </div>
@@ -230,17 +240,23 @@ export default function Home() {
                           /* --- SCENARIO B: STANDARD CARD --- */
                           <div className='w-full h-full p-6 flex flex-col justify-between'>
                             <div className='flex justify-between items-start w-full'>
+                              {/* Standard Icon: Apply the colored box style here */}
                               <div
                                 className={`
-                                w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center
+                                w-12 h-12 rounded-2xl shadow-sm flex items-center justify-center
                                 transition-transform group-hover:scale-110 duration-300
+                                ${theme.iconBox}
                               `}
                               >
-                                <IconComponent size={24} strokeWidth={2.5} className={theme.icon} />
+                                <IconComponent
+                                  size={24}
+                                  strokeWidth={2.5}
+                                  className='currentColor'
+                                />
                               </div>
                               <ArrowRight
                                 size={20}
-                                className={`opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 ${theme.icon}`}
+                                className={`opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 ${theme.iconText}`}
                               />
                             </div>
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import {
   ArrowRight,
   CheckCircle2,
@@ -17,17 +17,25 @@ import {
   Phone,
   User,
   Mail,
-  MapPin,
+  AlertOctagon,
+  Fan, // Importing Fan icon for Air Quality
 } from 'lucide-react';
-import SafetyCheck from './SafetyCheck';
 
 // --- CONFIGURATION: LOGIC MAPS ---
 
 // 1. CATEGORIES: Maps the input 'issueType' (from Tile) to a broad category
 const getCategory = (label) => {
   const l = label?.toLowerCase() || '';
+  // New check for Air Quality keywords
+  if (
+    l.includes('purif') ||
+    l.includes('humid') ||
+    l.includes('quality') ||
+    (l.includes('air') && !l.includes('condition'))
+  )
+    return 'AIR_QUALITY';
   if (l.includes('heat') || l.includes('warm')) return 'HEATING';
-  if (l.includes('cool') || l.includes('ac') || l.includes('air')) return 'COOLING';
+  if (l.includes('cool') || l.includes('ac')) return 'COOLING';
   if (l.includes('water') || l.includes('tank')) return 'WATER';
   return 'OTHER';
 };
@@ -53,6 +61,17 @@ const SYSTEM_OPTIONS = {
     { id: 'TANK', label: 'Hot Water Tank', icon: <Droplets className='text-blue-500' /> },
     { id: 'TANKLESS', label: 'Tankless Heater', icon: <Zap className='text-yellow-500' /> },
   ],
+  // --- NEW CATEGORY: AIR QUALITY ---
+  AIR_QUALITY: [
+    {
+      id: 'HUMIDIFIER',
+      label: 'Whole-Home Humidifier',
+      icon: <Droplets className='text-blue-400' />,
+    },
+    { id: 'PURIFIER', label: 'Air Purifier / HEPA', icon: <Fan className='text-cyan-500' /> },
+    { id: 'HRV_ERV', label: 'HRV / ERV Unit', icon: <Wind className='text-emerald-500' /> },
+  ],
+  // ---------------------------------
   OTHER: [
     { id: 'FURNACE', label: 'Furnace', icon: <Flame /> },
     { id: 'AC', label: 'A/C', icon: <Snowflake /> },
@@ -90,6 +109,23 @@ const ISSUE_OPTIONS = {
     { id: 'LEAK', label: 'Leaking', desc: 'Puddle at base of tank' },
     { id: 'RUST', label: 'Rusty Water', desc: 'Discolored water' },
   ],
+  // --- NEW AIR QUALITY ISSUES ---
+  HUMIDIFIER: [
+    { id: 'NOT_WORKING', label: 'Not Working', desc: 'House feels too dry' },
+    { id: 'LEAK', label: 'Leaking Water', desc: 'Water around the unit' },
+    { id: 'MAINTENANCE', label: 'Replace Pad/Filter', desc: 'Routine maintenance' },
+  ],
+  PURIFIER: [
+    { id: 'NOT_WORKING', label: 'Not Working', desc: "Won't turn on" },
+    { id: 'FILTER_LIGHT', label: 'Filter Light On', desc: 'Needs new media filter' },
+    { id: 'NOISE', label: 'Loud Noise', desc: 'Fan is making noise' },
+  ],
+  HRV_ERV: [
+    { id: 'NOT_WORKING', label: 'Not Working', desc: 'Stale air in house' },
+    { id: 'FILTER_CLEAN', label: 'Needs Cleaning', desc: 'Routine core cleaning' },
+    { id: 'NOISE', label: 'Loud Noise', desc: 'Fan or motor noise' },
+  ],
+  // ------------------------------
 };
 
 // --- MAIN COMPONENT ---
@@ -97,6 +133,7 @@ const ISSUE_OPTIONS = {
 export default function SmartQuote({ issueType, onBack }) {
   // View State: SAFETY -> WIZARD -> SUCCESS
   const [view, setView] = useState('SAFETY');
+  const [isUnsafe, setIsUnsafe] = useState(false); // Tracks if user hit the "Gas/Sparks" button
 
   // Wizard Steps: 1=System, 2=Issue, 3=Contact
   const [step, setStep] = useState(1);
@@ -108,7 +145,7 @@ export default function SmartQuote({ issueType, onBack }) {
     issue: '',
     name: '',
     phone: '',
-    email: '', // Added email for Calendly confirmation
+    email: '',
   });
 
   // --- HELPER LOGIC ---
@@ -118,14 +155,12 @@ export default function SmartQuote({ issueType, onBack }) {
   );
 
   const currentIssues = useMemo(() => {
-    // Try to find specific issues for the selected system (e.g., FURNACE), otherwise use DEFAULT
     return ISSUE_OPTIONS[formData.system] || ISSUE_OPTIONS.DEFAULT;
   }, [formData.system]);
 
   const handleNext = (key, value) => {
     setFormData((prev) => ({ ...prev, [key]: value }));
 
-    // Logic to advance steps
     if (step < TOTAL_STEPS) {
       setStep((prev) => prev + 1);
     } else {
@@ -134,20 +169,120 @@ export default function SmartQuote({ issueType, onBack }) {
   };
 
   const handleBack = () => {
+    // If on the red unsafe screen, go back to safety question
+    if (isUnsafe) {
+      setIsUnsafe(false);
+      return;
+    }
+
     if (step > 1) {
       setStep((prev) => prev - 1);
     } else {
-      // If at step 1, go back to safety check? Or exit?
-      // Let's go back to Safety Check to be safe, or allow full exit via onBack
-      setView('SAFETY');
+      // Go back to Safety Check start
+      onBack();
     }
   };
 
-  // --- RENDER 1: SAFETY CHECK ---
+  // --- RENDER 1: SAFETY CHECK (Integrated Logic) ---
   if (view === 'SAFETY') {
+    // A. RED WARNING SCREEN
+    if (isUnsafe) {
+      return (
+        <div className='w-full mx-auto animate-in fade-in zoom-in duration-300 max-w-2xl'>
+          <div className='bg-red-600 text-white rounded-[32px] p-8 md:p-12 shadow-2xl shadow-red-600/30 text-center relative overflow-hidden'>
+            {/* Background pattern overlay */}
+            <div className='absolute top-0 left-0 w-full h-full bg-[url("https://www.transparenttextures.com/patterns/diagmonds-light.png")] opacity-10 mix-blend-overlay pointer-events-none' />
+
+            <div className='relative z-10 flex flex-col items-center'>
+              <div className='w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mb-6 animate-pulse'>
+                <AlertTriangle className='w-10 h-10 text-white' />
+              </div>
+
+              <h2 className='text-3xl md:text-4xl font-bold mb-4'>Stop Immediately.</h2>
+              <p className='text-white/90 text-lg md:text-xl mb-8 leading-relaxed max-w-lg'>
+                Gas leaks and electrical sparks are life-threatening emergencies. Do not use this
+                form. Evacuate your home and call Enbridge now.
+              </p>
+
+              <a
+                href='tel:18667635427'
+                className='bg-white text-red-600 font-bold py-4 px-8 rounded-2xl text-lg hover:bg-red-50 transition-all w-full max-w-sm flex items-center justify-center gap-2 mb-4 shadow-lg'
+              >
+                <Phone className='w-5 h-5' /> Call 1-866-763-5427
+              </a>
+
+              <button
+                onClick={() => setIsUnsafe(false)}
+                className='text-white/70 hover:text-white text-sm font-semibold mt-4 underline decoration-white/30 transition-colors'
+              >
+                I made a mistake, it's safe.
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // B. INITIAL QUESTION SCREEN
     return (
-      <div className='max-w-2xl mx-auto'>
-        <SafetyCheck onSafe={() => setView('WIZARD')} onCancel={onBack} />
+      <div className='w-full mx-auto animate-in fade-in zoom-in duration-300 max-w-2xl'>
+        {/* GLASS CONTAINER */}
+        <div className='relative overflow-hidden bg-white/60 backdrop-blur-2xl border border-white/40 shadow-2xl shadow-rose-900/10 rounded-[32px] ring-1 ring-white/50'>
+          {/* Header */}
+          <div className='px-6 py-6 md:px-8 flex justify-between items-center'>
+            <button
+              type='button'
+              onClick={onBack}
+              className='group flex items-center gap-2 text-sm font-semibold text-rose-800/60 hover:text-rose-950 transition-colors px-3 py-1.5 rounded-full hover:bg-white/50'
+            >
+              <ChevronLeft className='w-4 h-4 group-hover:-translate-x-0.5 transition-transform' />
+              Home
+            </button>
+            <div className='text-xs font-bold text-rose-400 uppercase tracking-widest'>
+              Safety First
+            </div>
+          </div>
+
+          {/* Content Area */}
+          <div className='p-6 md:p-10 min-h-[400px] flex flex-col justify-center max-w-xl mx-auto w-full'>
+            <div className='animate-in slide-in-from-right-8 duration-500 space-y-8'>
+              <div className='text-center'>
+                <div className='inline-flex p-3 bg-amber-100 text-amber-600 rounded-full mb-4'>
+                  <AlertTriangle className='w-6 h-6' />
+                </div>
+                <h2 className='text-3xl font-bold text-rose-950 mb-3'>Safety Check</h2>
+                <p className='text-rose-900/60 font-medium text-lg leading-relaxed max-w-md mx-auto'>
+                  Before we start, do you smell gas (rotten eggs) or see electrical sparks?
+                </p>
+              </div>
+
+              <div className='grid gap-4 md:grid-cols-2'>
+                <SelectionTile
+                  icon={<CheckCircle2 className='text-emerald-500' />}
+                  title='No, it looks safe'
+                  desc='Proceed to booking'
+                  onClick={() => setView('WIZARD')}
+                  className='border-emerald-100 bg-emerald-50/50 hover:bg-emerald-100/80 hover:border-emerald-300'
+                />
+                <SelectionTile
+                  icon={<AlertTriangle className='text-red-500' />}
+                  title='Yes, I do'
+                  desc='Potential Danger'
+                  onClick={() => setIsUnsafe(true)}
+                  className='border-red-100 bg-red-50/50 hover:bg-red-100/80 hover:border-red-300'
+                />
+              </div>
+
+              <div className='p-4 bg-rose-50 rounded-xl border border-rose-100 flex gap-3 items-start'>
+                <Phone className='w-4 h-4 text-rose-500 shrink-0 mt-0.5' />
+                <p className='text-xs text-rose-800/70 leading-relaxed'>
+                  <strong>Note:</strong> If this is an emergency involving gas, call Enbridge Gas
+                  immediately at 1-866-763-5427.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
@@ -158,8 +293,6 @@ export default function SmartQuote({ issueType, onBack }) {
     const isEmergency =
       formData.issue === 'NO_HEAT' || formData.issue === 'NO_COOL' || formData.issue === 'LEAK';
 
-    // NOTE: You can flip this logic if you want EVERYONE to book via Calendly.
-    // Currently: "No Heat" = Call Us. Everything else = Calendly.
     if (isEmergency && formData.category === 'HEATING') {
       return <EmergencyOutput onBack={onBack} />;
     }

@@ -16,6 +16,7 @@ import {
 
 import SmartQuote from './components/SmartQuote';
 import ContentSections from './components/ContentSections';
+// Removed ControlTile import as it's not used here
 
 const ICON_MAP = {
   Flame: Flame,
@@ -275,9 +276,10 @@ export default function Home() {
           </div>
         )}
 
+        {/* FIX APPLIED: Removed bg-white, rounded-3xl, shadow-2xl to fix double-box issue */}
         {currentView === 'QUOTE' && (
-          <div className='flex-1 z-20 bg-white animate-in slide-in-from-right duration-300 rounded-3xl shadow-2xl min-h-[600px]'>
-            <div className='p-6'>
+          <div className='flex-1 z-20 animate-in slide-in-from-right duration-300 min-h-[600px] flex items-center'>
+            <div className='w-full'>
               <SmartQuote issueType={selectedIssue} onBack={goToGrid} />
             </div>
           </div>

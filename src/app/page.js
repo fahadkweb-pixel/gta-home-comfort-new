@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
+import Image from 'next/image'; // <--- Import Image
 import { client } from '@/sanity/lib/client';
 import { urlFor } from '@/sanity/lib/image';
 import {
@@ -19,7 +20,6 @@ import {
 
 import SmartQuote from './components/SmartQuote';
 import ContentSections from './components/ContentSections';
-// 1. SWAP IMPORT BACK to the new compact component
 import HomepageReviews from './components/HomepageReviews';
 
 const ICON_MAP = {
@@ -242,10 +242,14 @@ function HomeContent() {
                       {tile.backgroundImage ? (
                         <>
                           <div className='relative h-[60%] w-full overflow-hidden bg-white'>
-                            <img
-                              src={urlFor(tile.backgroundImage).width(600).url()}
+                            {/* OPTIMIZED IMAGE: Uses next/image + Priority + Sizes */}
+                            <Image
+                              src={urlFor(tile.backgroundImage).url()} // removed .width(600) as next/image handles resizing
                               alt={tile.label}
-                              className='w-full h-full object-cover transition-transform duration-700 group-hover:scale-105'
+                              fill
+                              priority={idx < 4} // Load first 4 instantly (LCP Fix)
+                              sizes='(max-width: 768px) 50vw, 25vw' // Mobile: 50% width, Desktop: 25% width
+                              className='object-cover transition-transform duration-700 group-hover:scale-105'
                             />
                             <div className='absolute top-4 left-4 z-10'>
                               <div className='w-10 h-10 rounded-2xl bg-white/95 backdrop-blur-sm shadow-sm flex items-center justify-center border border-slate-100'>
@@ -313,7 +317,6 @@ function HomeContent() {
               )}
             </div>
 
-            {/* 2. RESTORED COMPACT CONTAINER: Matches grid height better */}
             <div className='h-64 md:h-72 shrink-0 mt-2'>
               <HomepageReviews />
             </div>

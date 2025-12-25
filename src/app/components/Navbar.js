@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react'; // Added useEffect
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { client } from '@/sanity/lib/client'; // Import Client
-import { urlFor } from '@/sanity/lib/image'; // Import Image Builder
+import Image from 'next/image'; // <--- Import Image
+import { client } from '@/sanity/lib/client';
+import { urlFor } from '@/sanity/lib/image';
 import {
   Menu,
   X,
@@ -54,9 +55,8 @@ const SERVICES = [
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
-  const [logoData, setLogoData] = useState(null); // State for the logo
+  const [logoData, setLogoData] = useState(null);
 
-  // Fetch the logo on component mount
   useEffect(() => {
     const fetchSettings = async () => {
       try {
@@ -76,12 +76,14 @@ export default function Navbar() {
           {/* 1. LOGO LOGIC */}
           <Link href='/' className='flex items-center gap-2 group'>
             {logoData?.logo ? (
-              // A: Render Uploaded Image if available
-              <div className='relative h-12 w-auto min-w-[120px]'>
-                <img
-                  src={urlFor(logoData.logo).height(100).url()}
+              // A: Render Uploaded Image if available (Optimized with Next/Image)
+              <div className='relative h-12 w-32'>
+                <Image
+                  src={urlFor(logoData.logo).url()}
                   alt={logoData.companyName || 'Company Logo'}
-                  className='h-full w-auto object-contain'
+                  fill
+                  className='object-contain object-left'
+                  sizes='(max-width: 768px) 120px, 150px'
                 />
               </div>
             ) : (

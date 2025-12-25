@@ -1,110 +1,185 @@
 'use client';
 
-import { Wrench, Star, ShieldCheck, MapPin, Instagram, Facebook, Twitter } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { client } from '@/sanity/lib/client';
+import { urlFor } from '@/sanity/lib/image';
+import { Flame, MapPin, Phone, Mail, Facebook, Instagram, ArrowRight } from 'lucide-react';
+
+const SERVICES = [
+  { name: 'Heating Solutions', href: '/heating' },
+  { name: 'Cooling Systems', href: '/cooling' },
+  { name: 'Water Heating', href: '/water' },
+  { name: 'Indoor Air Quality', href: '/air-quality' },
+];
 
 export default function Footer() {
+  const [settings, setSettings] = useState(null);
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const data = await client.fetch(`*[_type == "settings"][0]`);
+        setSettings(data);
+      } catch (error) {
+        console.error('Failed to fetch footer settings:', error);
+      }
+    };
+    fetchSettings();
+  }, []);
+
+  const currentYear = new Date().getFullYear();
+
   return (
-    <footer className='w-full bg-rose-950 text-rose-100/80 pt-16 pb-8 border-t border-rose-900 mt-auto'>
-      <div className='max-w-5xl mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-12 mb-16'>
-        {/* BRAND COLUMN */}
-        <div className='col-span-1 md:col-span-2 space-y-6'>
-          <Link
-            href='/'
-            className='flex items-center gap-2 text-white font-bold text-xl group w-fit'
-          >
-            <div className='bg-rose-900 p-1.5 rounded-lg border border-rose-800 group-hover:bg-rose-800 transition-colors'>
-              <Wrench className='w-5 h-5 text-rose-500' />
+    <footer className='bg-slate-900 text-slate-300 border-t border-slate-800'>
+      <div className='max-w-7xl mx-auto px-6 pt-16 pb-8'>
+        <div className='grid md:grid-cols-4 gap-12 mb-16'>
+          {/* COLUMN 1: BRAND & INFO */}
+          <div className='col-span-1 md:col-span-1'>
+            <Link href='/' className='flex items-center gap-2 mb-6 group'>
+              {settings?.logo ? (
+                <img
+                  src={urlFor(settings.logo).height(60).url()}
+                  alt='Logo'
+                  className='h-10 w-auto opacity-90 group-hover:opacity-100 transition-opacity'
+                />
+              ) : (
+                <>
+                  <div className='w-10 h-10 bg-rose-600 rounded-xl flex items-center justify-center text-white'>
+                    <Flame size={24} fill='white' />
+                  </div>
+                  <span className='font-bold text-white text-xl'>GTA Home</span>
+                </>
+              )}
+            </Link>
+            <p className='text-slate-400 mb-6 leading-relaxed text-sm'>
+              Your local experts for furnace repair, AC installation, and home comfort solutions
+              across the Greater Toronto Area.
+            </p>
+            <div className='flex gap-4'>
+              {settings?.facebook && (
+                <a
+                  href={settings.facebook}
+                  target='_blank'
+                  rel='noopener noreferrer'
+                  className='w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center hover:bg-blue-600 hover:text-white transition-all'
+                >
+                  <Facebook size={18} />
+                </a>
+              )}
+              {settings?.instagram && (
+                <a
+                  href={settings.instagram}
+                  target='_blank'
+                  rel='noopener noreferrer'
+                  className='w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center hover:bg-pink-600 hover:text-white transition-all'
+                >
+                  <Instagram size={18} />
+                </a>
+              )}
             </div>
-            GTA Home Comfort
-          </Link>
-          <p className='text-sm leading-relaxed max-w-sm opacity-80'>
-            Advanced diagnostics and rapid repair for residential thermal systems. Operating
-            strictly within the Scarborough, ON region.
-          </p>
+          </div>
 
-          <div className='flex flex-col sm:flex-row gap-4 sm:items-center'>
-            {/* TRUST BADGE (5/5) */}
-            <div className='flex items-center gap-3 text-xs font-medium bg-rose-900/30 w-fit px-4 py-2 rounded-xl border border-rose-800/50 backdrop-blur-sm'>
-              <div className='flex gap-0.5'>
-                {[1, 2, 3, 4, 5].map((i) => (
-                  <Star key={i} className='w-3.5 h-3.5 text-orange-400 fill-orange-400' />
-                ))}
-              </div>
-              <span className='text-white font-bold ml-1'>5.0/5.0</span>
-              <span className='text-rose-400 pl-2 border-l border-rose-800 ml-1'>
-                Verified on Google
-              </span>
-            </div>
+          {/* COLUMN 2: SERVICES */}
+          <div>
+            <h3 className='text-white font-bold mb-6 tracking-wide text-sm uppercase'>Services</h3>
+            <ul className='space-y-3'>
+              {SERVICES.map((service) => (
+                <li key={service.name}>
+                  <Link
+                    href={service.href}
+                    className='text-slate-400 hover:text-rose-400 flex items-center gap-2 transition-colors text-sm'
+                  >
+                    <ArrowRight size={14} className='opacity-0 -ml-4 hover-trigger' />
+                    {service.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
 
-            {/* SOCIAL ICONS */}
-            <div className='flex gap-4 items-center pl-2'>
-              <SocialLink href='#' icon={<Instagram className='w-5 h-5' />} label='Instagram' />
-              <SocialLink href='#' icon={<Facebook className='w-5 h-5' />} label='Facebook' />
-              <SocialLink href='#' icon={<Twitter className='w-5 h-5' />} label='Twitter' />
-            </div>
+          {/* COLUMN 3: COMPANY */}
+          <div>
+            <h3 className='text-white font-bold mb-6 tracking-wide text-sm uppercase'>Company</h3>
+            <ul className='space-y-3'>
+              <li>
+                <Link
+                  href='/about'
+                  className='text-slate-400 hover:text-rose-400 transition-colors text-sm'
+                >
+                  Our Story
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href='/#reviews'
+                  className='text-slate-400 hover:text-rose-400 transition-colors text-sm'
+                >
+                  Reviews
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href='/contact'
+                  className='text-slate-400 hover:text-rose-400 transition-colors text-sm'
+                >
+                  Contact Us
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href='/contact'
+                  className='text-slate-400 hover:text-rose-400 transition-colors text-sm'
+                >
+                  Service Area
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* COLUMN 4: CONTACT */}
+          <div>
+            <h3 className='text-white font-bold mb-6 tracking-wide text-sm uppercase'>Contact</h3>
+            <ul className='space-y-4'>
+              <li className='flex items-start gap-3'>
+                <MapPin size={20} className='text-rose-500 shrink-0' />
+                <span className='text-slate-400 text-sm'>
+                  {settings?.address || 'Scarborough, ON'}
+                </span>
+              </li>
+              <li className='flex items-center gap-3'>
+                <Phone size={20} className='text-rose-500 shrink-0' />
+                <a
+                  href={`tel:${settings?.phone}`}
+                  className='text-slate-400 hover:text-white transition-colors text-sm'
+                >
+                  {settings?.phone || '416-678-2131'}
+                </a>
+              </li>
+              <li className='flex items-center gap-3'>
+                <Mail size={20} className='text-rose-500 shrink-0' />
+                <a
+                  href={`mailto:${settings?.email}`}
+                  className='text-slate-400 hover:text-white transition-colors text-sm'
+                >
+                  {settings?.email || 'info@gtahomecomfort.com'}
+                </a>
+              </li>
+            </ul>
           </div>
         </div>
 
-        {/* EMERGENCY ACTION COLUMN */}
-        <div className='flex flex-col justify-start md:items-end'>
-          <h3 className='text-white font-bold mb-6 text-xs tracking-widest uppercase opacity-50'>
-            Emergency Dispatch
-          </h3>
-          <ul className='space-y-4 text-sm md:text-right'>
-            <li>
-              <a
-                href='tel:4166782131'
-                className='text-3xl font-bold text-white hover:text-rose-400 transition-colors block tracking-tight'
-              >
-                416-678-2131
-              </a>
-              <span className='text-xs text-rose-400 block mt-1'>24/7 Direct Line</span>
-            </li>
-            <li className='pt-2'>
-              <a
-                href='mailto:help@gtahomecomfort.com'
-                className='text-rose-200 hover:text-white transition-colors'
-              >
-                help@gtahomecomfort.com
-              </a>
-            </li>
-          </ul>
-        </div>
-      </div>
-
-      {/* BOTTOM BAR */}
-      <div className='max-w-5xl mx-auto px-4 pt-8 border-t border-rose-900/50 flex flex-col md:flex-row justify-between items-center gap-4 text-xs opacity-50 font-medium'>
-        <div className='flex flex-col md:flex-row items-center gap-4 md:gap-8'>
-          <span>&copy; {new Date().getFullYear()} GTA Home Comfort Inc.</span>
-          <span className='flex items-center gap-1.5'>
-            <ShieldCheck className='w-3 h-3' /> TSSA #76543991
-          </span>
-          <span className='flex items-center gap-1.5'>
-            <MapPin className='w-3 h-3' /> Scarborough, ON
-          </span>
-        </div>
-        <div className='flex gap-6'>
-          <Link href='/' className='hover:text-white transition-colors'>
-            Privacy
-          </Link>
-          <Link href='/' className='hover:text-white transition-colors'>
-            Terms
-          </Link>
+        {/* BOTTOM BAR */}
+        <div className='pt-8 border-t border-slate-800 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-slate-500'>
+          <div>
+            © {currentYear} {settings?.companyName || 'GTA Home Comfort'}. All rights reserved.
+          </div>
+          <div className='flex gap-6'>
+            <span>TSSA License #00000000</span>
+            <span>Privacy Policy</span>
+          </div>
         </div>
       </div>
     </footer>
-  );
-}
-
-function SocialLink({ href, icon, label }) {
-  return (
-    <a
-      href={href}
-      className='text-rose-300 hover:text-white hover:scale-110 transition-all duration-200'
-      aria-label={label}
-    >
-      {icon}
-    </a>
   );
 }

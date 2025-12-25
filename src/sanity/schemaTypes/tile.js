@@ -3,7 +3,7 @@ import { defineField, defineType } from 'sanity';
 export const tileType = defineType({
   name: 'tile',
   title: 'Control Tile',
-  type: 'object',
+  type: 'object', // This is the key line that keeps it hidden from the sidebar
   fields: [
     defineField({
       name: 'label',
@@ -11,7 +11,7 @@ export const tileType = defineType({
       type: 'string',
       validation: (rule) => rule.required(),
     }),
-    // --- NEW FIELD: Bold Toggle ---
+    // --- Bold Toggle ---
     defineField({
       name: 'labelBold',
       title: 'Bold Label Text?',
@@ -19,7 +19,6 @@ export const tileType = defineType({
       initialValue: true,
       description: 'Turn off for thinner, lighter text.',
     }),
-    // ------------------------------
     defineField({
       name: 'subtitle',
       title: 'Subtitle',

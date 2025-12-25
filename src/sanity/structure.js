@@ -35,5 +35,4 @@ export const structure = (S) =>
 
       // 3. DATA COLLECTIONS
       S.documentTypeListItem('review').title('Customer Reviews'),
-      S.documentTypeListItem('tile').title('Homepage Tiles'),
     ]);

@@ -46,6 +46,10 @@ const nextConfig = {
             value: 'on',
           },
           {
+            key: 'Link',
+            value: '<https://cdn.sanity.io>; rel=preconnect',
+          },
+          {
             key: 'Strict-Transport-Security',
             value: 'max-age=63072000; includeSubDomains; preload',
           },

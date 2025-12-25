@@ -88,10 +88,8 @@ export default function Navbar() {
                   width={160}
                   height={48}
                   priority
-                  // REMOVED 'w-auto' to prevent browser confusion
-                  className='object-contain object-left'
-                  // ENFORCE strict size to kill CLS
-                  style={{ width: '160px', height: '48px' }}
+                  className='object-contain object-left' // Removed w-auto/w-32
+                  style={{ width: '160px', height: 'auto' }} // Forces strict aspect ratio
                 />
               </div>
             ) : (

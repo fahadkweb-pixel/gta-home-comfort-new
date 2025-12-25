@@ -6,7 +6,42 @@ import Link from 'next/link';
 // Navbar/Footer handled by global layout
 import ServicePageReviews from '../components/ServicePageReviews';
 
+// --- 1. NEW: SEO METADATA GENERATOR ---
+export async function generateMetadata({ params }) {
+  const { slug } = await params;
+
+  // Fetch only the SEO fields to keep it fast
+  const data = await client.fetch(
+    `*[_type == "servicePage" && slug.current == $slug][0]{
+      seoTitle,
+      seoDescription,
+      seoImage,
+      title
+    }`,
+    { slug }
+  );
+
+  if (!data) return { title: 'GTA Home Comfort' };
+
+  // Fallback logic if you forget to fill in the SEO tab
+  const pageTitle = data.seoTitle || `${data.title} | GTA Home Comfort`;
+  const pageDesc =
+    data.seoDescription || `Professional ${data.title} services in the Greater Toronto Area.`;
+
+  return {
+    title: pageTitle,
+    description: pageDesc,
+    openGraph: {
+      title: pageTitle,
+      description: pageDesc,
+      images: data.seoImage ? [urlFor(data.seoImage).width(1200).height(630).url()] : [],
+    },
+  };
+}
+
+// --- 2. EXISTING DATA FETCHER ---
 async function getPage(slug) {
+  // Added "seoTitle" etc to query just in case, though usually handled by generateMetadata
   return client.fetch(`*[_type == "servicePage" && slug.current == $slug][0]`, { slug });
 }
 
@@ -45,7 +80,7 @@ export default async function ServicePage({ params }) {
         </div>
       </section>
 
-      {/* 2. REPAIR VS REPLACE (UPDATED LINKS) */}
+      {/* 2. REPAIR VS REPLACE */}
       {page.showSplitSection && (
         <section className='relative z-20 -mt-20 max-w-5xl mx-auto px-6 grid md:grid-cols-2 gap-6 mb-20'>
           <div className='bg-white p-8 rounded-[32px] shadow-xl shadow-rose-900/10 border border-white/50 hover:-translate-y-1 transition-transform duration-300'>
@@ -137,7 +172,7 @@ export default async function ServicePage({ params }) {
         </section>
       )}
 
-      {/* CTA Banner (UPDATED LINK) */}
+      {/* CTA Banner */}
       <section className='bg-rose-950 py-20 text-center text-white relative overflow-hidden'>
         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-5"></div>
         <div className='relative z-10 max-w-2xl mx-auto px-6'>

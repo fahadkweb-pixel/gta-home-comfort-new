@@ -1,13 +1,27 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // 1. Fixes the Sanity Studio "flushSync" error
+  // 1. PERFORMANCE: Force SWC Minify (Faster & smaller JS)
+  swcMinify: true,
+
+  // 2. PERFORMANCE: Optimize imports for Lucide Icons (Reduces JS size significantly)
+  experimental: {
+    optimizePackageImports: ['lucide-react', 'date-fns', 'lodash'],
+  },
+
+  // 3. Fixes the Sanity Studio "flushSync" error
   reactStrictMode: false,
 
-  // 2. SECURITY: Hide source maps in production (prevents code inspection)
+  // 4. SECURITY: Hide source maps in production (prevents code inspection)
   productionBrowserSourceMaps: false,
 
-  // 3. Allows images from Sanity to load
+  // 5. PRODUCTION CLEANUP: Remove console.logs in production
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production',
+  },
+
+  // 6. IMAGE OPTIMIZATION
   images: {
+    formats: ['image/avif', 'image/webp'], // <--- ADDED AVIF SUPPORT
     remotePatterns: [
       {
         protocol: 'https',
@@ -16,7 +30,7 @@ const nextConfig = {
     ],
   },
 
-  // 4. SECURITY HEADERS (The "Helmet")
+  // 7. SECURITY HEADERS (The "Helmet")
   async headers() {
     return [
       {
@@ -36,7 +50,7 @@ const nextConfig = {
           },
           {
             key: 'X-Frame-Options',
-            value: 'SAMEORIGIN', // Blocks your site from being embedded in iframes (Clickjacking protection)
+            value: 'SAMEORIGIN',
           },
           {
             key: 'X-XSS-Protection',
@@ -51,7 +65,7 @@ const nextConfig = {
     ];
   },
 
-  // 5. SEO Redirects (Preserved from your previous config)
+  // 8. SEO Redirects
   async redirects() {
     return [
       // HEATING CONSOLIDATION

@@ -79,10 +79,8 @@ export default function Navbar() {
           {/* 1. LOGO LOGIC - SKELETON & DIMENSIONS */}
           <Link href='/' className='flex items-center gap-2 group'>
             {loading ? (
-              // SKELETON: Prevents logo flash/jump
               <div className='h-12 w-32 bg-slate-100 animate-pulse rounded-lg' />
             ) : logoData?.logo ? (
-              // A: Render Uploaded Image
               <div className='relative flex items-center'>
                 <Image
                   src={urlFor(logoData.logo).width(300).url()}
@@ -90,7 +88,10 @@ export default function Navbar() {
                   width={160}
                   height={48}
                   priority
-                  className='object-contain object-left w-auto h-12'
+                  // REMOVED 'w-auto' to prevent browser confusion
+                  className='object-contain object-left'
+                  // ENFORCE strict size to kill CLS
+                  style={{ width: '160px', height: '48px' }}
                 />
               </div>
             ) : (

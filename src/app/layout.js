@@ -14,14 +14,15 @@ const inter = Inter({
 
 export const metadata = {
   title: {
-    default: 'Toronto HVAC, Furnace & AC Repair | GTA Home Comfort',
+    default: 'GTA Home Comfort | HVAC, Heating & Cooling Services Toronto',
     template: '%s | GTA Home Comfort',
   },
   description:
-    'Expert heating and cooling services in Toronto & the GTA. Fast repairs for furnaces, AC, and water heaters. Start your free Smart Quote online today.',
+    'Trusted HVAC experts serving Toronto & the GTA. Furnace, AC, water heaters & air quality services. Fast, honest, local service.',
   openGraph: {
-    title: 'Toronto HVAC, Furnace & AC Repair | GTA Home Comfort',
-    description: 'Expert heating and cooling services in Toronto & the GTA.',
+    title: 'GTA Home Comfort | HVAC, Heating & Cooling Services Toronto',
+    description:
+      'Trusted HVAC experts serving Toronto & the GTA. Furnace, AC, water heaters & air quality services. Fast, honest, local service.',
     type: 'website',
   },
 };

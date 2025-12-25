@@ -173,7 +173,7 @@ export default function Navbar() {
               <span className='text-[10px] font-bold text-slate-400 uppercase tracking-wider'>
                 24/7 Emergency Support
               </span>
-              <span className='text-lg font-bold text-slate-900 font-mono'>416-678-2131</span>
+              <span className='text-lg font-bold text-slate-900 font-inter'>416-678-2131</span>
             </div>
             <a
               href='tel:4166782131'

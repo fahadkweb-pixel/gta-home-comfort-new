@@ -3,15 +3,24 @@
 import { createClient } from 'next-sanity';
 import { apiVersion, dataset, projectId } from '@/sanity/env';
 
+// Initialize the client with the WRITE token
 const writeClient = createClient({
   projectId,
   dataset,
   apiVersion,
-  useCdn: false,
-  token: process.env.SANITY_API_WRITE_TOKEN, // This uses the token you just created
+  useCdn: false, // We need fresh data for writes
+  token: process.env.SANITY_API_WRITE_TOKEN,
 });
 
 export async function createLead(formData) {
+  // --- 1. SECURITY: HONEYPOT CHECK ---
+  // If the hidden "bot_field" has ANY value, it is a bot.
+  // We return { success: true } so the bot thinks it succeeded, but we do nothing.
+  if (formData.bot_field) {
+    console.warn('Bot submission detected and blocked.');
+    return { success: true };
+  }
+
   try {
     const doc = {
       _type: 'lead',
@@ -28,7 +37,7 @@ export async function createLead(formData) {
     return { success: true };
   } catch (error) {
     console.error('Sanity Write Error:', error);
-    // We return success:true anyway so we don't block the user's UI if saving fails
+    // We return success: true to prevent blocking the user's UI if the logging fails
     return { success: true };
   }
 }

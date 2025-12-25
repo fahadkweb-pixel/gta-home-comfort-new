@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
-import { createLead } from '../actions';
 import {
   ArrowRight,
   CheckCircle2,
@@ -20,11 +19,12 @@ import {
   Mail,
   Fan,
   MapPin,
-  RefreshCw, // Icon for Replace
-  PlusCircle, // Icon for New Install
+  RefreshCw,
+  PlusCircle,
 } from 'lucide-react';
 import { PopupModal } from 'react-calendly';
 import GooglePlacesAutocomplete from 'react-google-places-autocomplete';
+import { createLead } from '../actions'; // <--- Import the Server Action
 
 // --- CONFIGURATION: LOGIC MAPS ---
 
@@ -89,7 +89,6 @@ const SYSTEM_OPTIONS = {
 };
 
 const ISSUE_OPTIONS = {
-  // --- UPDATED INSTALLATION OPTIONS ---
   INSTALLATION_TYPE: [
     {
       id: 'REPLACE',
@@ -105,7 +104,6 @@ const ISSUE_OPTIONS = {
     },
     { id: 'NOT_SURE', label: 'Not Sure / Other', desc: 'I need a professional opinion' },
   ],
-  // ------------------------------------
   DEFAULT: [
     { id: 'BROKEN', label: 'Not Working', desc: "System won't turn on" },
     { id: 'NOISE', label: 'Weird Noise', desc: 'Banging, humming, or clicking' },
@@ -147,10 +145,7 @@ const ISSUE_OPTIONS = {
 };
 
 export default function SmartQuote({ issueType, onBack }) {
-  // 1. CALCULATE CATEGORY IMMEDIATELY
   const initialCategory = useMemo(() => getCategory(issueType), [issueType]);
-
-  // 2. SET INITIAL VIEW: Bypass SAFETY if it's an Installation
   const [view, setView] = useState(initialCategory === 'INSTALLATION' ? 'WIZARD' : 'SAFETY');
 
   const [isUnsafe, setIsUnsafe] = useState(false);
@@ -167,6 +162,7 @@ export default function SmartQuote({ issueType, onBack }) {
     phone: '',
     email: '',
     address: '',
+    bot_field: '', // Initialize Honeypot field
   });
 
   const currentSystems = useMemo(
@@ -181,7 +177,6 @@ export default function SmartQuote({ issueType, onBack }) {
     return ISSUE_OPTIONS[formData.system] || ISSUE_OPTIONS.DEFAULT;
   }, [formData.system, formData.category]);
 
-  // 3. UPDATED TITLES
   const getStepTitle = () => {
     if (step === 1) {
       return formData.category === 'INSTALLATION'
@@ -230,11 +225,9 @@ export default function SmartQuote({ issueType, onBack }) {
     if (step > 1) {
       setStep((prev) => prev - 1);
     } else {
-      // If we skipped safety, going back from Step 1 should exit to Home
       if (formData.category === 'INSTALLATION') {
         onBack();
       } else {
-        // Otherwise go back to Safety check
         setView('SAFETY');
       }
     }
@@ -406,7 +399,7 @@ export default function SmartQuote({ issueType, onBack }) {
                     key={opt.id}
                     title={opt.label}
                     desc={opt.desc}
-                    icon={opt.icon} // Pass icon here
+                    icon={opt.icon}
                     onClick={() => handleNext('issue', opt.id, opt.label)}
                   />
                 ))}
@@ -429,22 +422,25 @@ export default function SmartQuote({ issueType, onBack }) {
               <form
                 onSubmit={async (e) => {
                   e.preventDefault();
-                  // 3. ONLY SUBMIT IF REQUIRED FIELDS ARE FILLED
                   if (formData.name && formData.phone && formData.address) {
-                    // --- NEW: FIRE AND FORGET LEAD CAPTURE ---
-                    // We don't await this because we don't want to delay the UI.
-                    // It runs in the background.
+                    // --- SECURITY: FIRE LEAD CAPTURE ---
                     createLead(formData);
-
-                    // Proceed to success screen immediately
                     handleNext('contact', 'SUBMIT');
                   }
                 }}
                 className='space-y-4'
               >
-                {/* 4. ADDRESS FIELD WITH AUTOCOMPLETE & SECURE KEY */}
+                {/* --- HONEYPOT FIELD (Hidden from humans) --- */}
+                <input
+                  type='text'
+                  name='bot_field'
+                  style={{ display: 'none' }}
+                  tabIndex={-1}
+                  autoComplete='off'
+                  onChange={(e) => setFormData((prev) => ({ ...prev, bot_field: e.target.value }))}
+                />
+
                 <div className='relative group z-50'>
-                  {/* z-50 is important for dropdowns */}
                   <MapPin className='absolute left-4 top-[18px] z-10 w-5 h-5 text-rose-300' />
                   <div className='google-places-autocomplete-wrapper'>
                     <GooglePlacesAutocomplete
@@ -456,13 +452,12 @@ export default function SmartQuote({ issueType, onBack }) {
                         onChange: (val) => setFormData((prev) => ({ ...prev, address: val.label })),
                         placeholder: 'Service Address (Start Typing...)',
                         styles: {
-                          // Minimalist styling to match your theme
                           control: (provided) => ({
                             ...provided,
-                            borderRadius: '1rem', // rounded-2xl
+                            borderRadius: '1rem',
                             border: '1px solid rgba(255, 255, 255, 0.4)',
                             backgroundColor: 'rgba(255, 255, 255, 0.5)',
-                            paddingLeft: '40px', // Make room for icon
+                            paddingLeft: '40px',
                             paddingBlock: '6px',
                             boxShadow: 'none',
                             '&:hover': { borderColor: '#fecdd3' },
@@ -517,6 +512,12 @@ export default function SmartQuote({ issueType, onBack }) {
                 >
                   Continue to Booking <ArrowRight className='w-5 h-5' />
                 </button>
+
+                {/* --- PRIVACY TEXT --- */}
+                <p className='text-[10px] text-center text-rose-900/40 px-4 leading-tight'>
+                  By continuing, you agree to allow GTA Home Comfort to contact you regarding your
+                  request. Your data is secured and never sold.
+                </p>
               </form>
             </div>
           )}
@@ -578,7 +579,6 @@ function BookingOutput({ contactData, onBack }) {
             email: contactData.email,
             firstName: contactData.name,
             smsReminderNumber: contactData.phone,
-            // INJECT ADDRESS into Custom Answer 'a1' (Check your Calendly for exact mapping)
             customAnswers: {
               a1: contactData.address,
             },

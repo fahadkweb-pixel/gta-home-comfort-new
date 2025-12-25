@@ -4,7 +4,8 @@ import { homepageType } from './homepage';
 import { servicePage } from './servicePage';
 import { aboutPage } from './aboutPage';
 import { contactPage } from './contactPage';
-import { settings } from './settings'; // <--- 1. Import
+import { settings } from './settings';
+import lead from './lead'; // <--- ADD THIS LINE
 
 export const schema = {
   types: [
@@ -14,7 +15,7 @@ export const schema = {
     servicePage,
     aboutPage,
     contactPage,
-    lead,
-    settings, // <--- 2. Add to list
+    lead, // <--- Now this will work
+    settings,
   ],
 };

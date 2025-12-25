@@ -28,6 +28,11 @@ export const structure = (S) =>
 
       S.divider(),
 
+      // 3. NEW: Inbound Leads (Add this block)
+      S.documentTypeListItem('lead').title('Inbound Leads'),
+
+      S.divider(),
+
       // 3. DATA COLLECTIONS
       S.documentTypeListItem('review').title('Customer Reviews'),
       S.documentTypeListItem('tile').title('Homepage Tiles'),

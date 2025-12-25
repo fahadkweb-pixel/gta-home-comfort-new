@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { Phone, Mail, MapPin, Calculator, ArrowRight } from 'lucide-react';
 
 async function getContactData() {
-  return client.fetch(`*[_type == "contactPage"][0]`);
+  return client.fetch(`*[_type == "contactPage" && _id == "contactPage"][0]`);
 }
 
 export default async function ContactPage() {

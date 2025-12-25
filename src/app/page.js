@@ -103,7 +103,7 @@ function HomeContent() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const data = await client.fetch(`*[_type == "homepage"][0]{
+        const data = await client.fetch(`*[_type == "homepage" && _id == "homepage"][0]{
           heading,
           subheading,
           description,  

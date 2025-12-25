@@ -75,7 +75,6 @@ export default function Navbar() {
         <div className='flex justify-between items-center h-20'>
           {/* 1. LOGO LOGIC */}
           <Link href='/' className='flex items-center gap-2 group'>
-            // ... inside Navbar return statement
             {logoData?.logo ? (
               // A: Render Uploaded Image with EXPLICIT dimensions
               <div className='relative flex items-center'>

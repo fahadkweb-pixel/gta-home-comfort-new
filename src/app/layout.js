@@ -2,7 +2,8 @@ import './globals.css';
 import { Inter } from 'next/font/google';
 import Navbar from './components/Navbar';
 import TrustBar from './components/TrustBar';
-import Footer from './components/Footer'; // Import the new Footer
+import Footer from './components/Footer';
+import { GoogleTagManager } from '@next/third-parties/google'; // <--- Import the library
 
 const inter = Inter({
   subsets: ['latin'],
@@ -10,7 +11,10 @@ const inter = Inter({
 });
 
 export const metadata = {
-  title: 'Toronto HVAC, Furnace & AC Repair | GTA Home Comfort',
+  title: {
+    default: 'Toronto HVAC, Furnace & AC Repair | GTA Home Comfort',
+    template: '%s | GTA Home Comfort',
+  },
   description:
     'Expert heating and cooling services in Toronto & the GTA. Fast repairs for furnaces, AC, and water heaters. Start your free Smart Quote online today.',
   openGraph: {
@@ -28,9 +32,12 @@ export default function RootLayout({ children }) {
       >
         <TrustBar />
         <Navbar />
-        {/* Main takes available space, pushing Footer to bottom if content is short */}
         <main className='flex-1 w-full relative z-0'>{children}</main>
         <Footer />
+
+        {/* --- GOOGLE TAG MANAGER --- */}
+        {/* This loads your existing GTM container on every page view. */}
+        <GoogleTagManager gtmId={process.env.NEXT_PUBLIC_GTM_ID} />
       </body>
     </html>
   );

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
-import { createLead } from './actions';
+import { createLead } from '../actions';
 import {
   ArrowRight,
   CheckCircle2,

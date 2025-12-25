@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import Image from 'next/image'; // <--- Import Image
+import Image from 'next/image';
 import { client } from '@/sanity/lib/client';
 import { urlFor } from '@/sanity/lib/image';
 import {
@@ -76,12 +76,13 @@ export default function Navbar() {
           {/* 1. LOGO LOGIC */}
           <Link href='/' className='flex items-center gap-2 group'>
             {logoData?.logo ? (
-              // A: Render Uploaded Image if available (Optimized with Next/Image)
+              // A: Render Uploaded Image if available
               <div className='relative h-12 w-32'>
                 <Image
-                  src={urlFor(logoData.logo).url()}
+                  src={urlFor(logoData.logo).width(300).url()} // Request reasonable size
                   alt={logoData.companyName || 'Company Logo'}
                   fill
+                  priority // <--- LOAD INSTANTLY
                   className='object-contain object-left'
                   sizes='(max-width: 768px) 120px, 150px'
                 />

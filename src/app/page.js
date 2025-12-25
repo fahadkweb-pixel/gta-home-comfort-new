@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import Image from 'next/image'; // <--- Import Image
+import Image from 'next/image';
 import { client } from '@/sanity/lib/client';
 import { urlFor } from '@/sanity/lib/image';
 import {
@@ -242,13 +242,13 @@ function HomeContent() {
                       {tile.backgroundImage ? (
                         <>
                           <div className='relative h-[60%] w-full overflow-hidden bg-white'>
-                            {/* OPTIMIZED IMAGE: Uses next/image + Priority + Sizes */}
+                            {/* OPTIMIZED IMAGE: Only Priority the FIRST tile */}
                             <Image
-                              src={urlFor(tile.backgroundImage).url()} // removed .width(600) as next/image handles resizing
+                              src={urlFor(tile.backgroundImage).width(1200).url()}
                               alt={tile.label}
                               fill
-                              priority={idx < 4} // Load first 4 instantly (LCP Fix)
-                              sizes='(max-width: 768px) 50vw, 25vw' // Mobile: 50% width, Desktop: 25% width
+                              priority={idx === 0} // <--- ONLY THE FIRST IMAGE
+                              sizes='(max-width: 768px) 50vw, 25vw'
                               className='object-cover transition-transform duration-700 group-hover:scale-105'
                             />
                             <div className='absolute top-4 left-4 z-10'>

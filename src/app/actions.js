@@ -14,15 +14,20 @@ const writeClient = createClient({
 
 export async function createLead(formData) {
   // --- 1. SECURITY: HONEYPOT CHECK ---
-  // If the hidden "bot_field" has ANY value, it is a bot.
-  // We return { success: true } so the bot thinks it succeeded, but we do nothing.
   if (formData.bot_field) {
     console.warn('Bot submission detected and blocked.');
     return { success: true };
   }
 
   try {
+    // --- 2. PRIVACY: SAVE AS DRAFT ---
+    // We generate a custom ID starting with "drafts.".
+    // This makes the document "invisible" to public API queries.
+    // Only authenticated users (YOU) can see it in the Studio.
+    const safeId = `drafts.${crypto.randomUUID()}`;
+
     const doc = {
+      _id: safeId, // <--- Forces Draft Mode
       _type: 'lead',
       name: formData.name,
       phone: formData.phone,
@@ -37,7 +42,6 @@ export async function createLead(formData) {
     return { success: true };
   } catch (error) {
     console.error('Sanity Write Error:', error);
-    // We return success: true to prevent blocking the user's UI if the logging fails
     return { success: true };
   }
 }

@@ -75,16 +75,17 @@ export default function Navbar() {
         <div className='flex justify-between items-center h-20'>
           {/* 1. LOGO LOGIC */}
           <Link href='/' className='flex items-center gap-2 group'>
+            // ... inside Navbar return statement
             {logoData?.logo ? (
-              // A: Render Uploaded Image if available
-              <div className='relative h-12 w-32'>
+              // A: Render Uploaded Image with EXPLICIT dimensions
+              <div className='relative flex items-center'>
                 <Image
-                  src={urlFor(logoData.logo).width(300).url()} // Request reasonable size
+                  src={urlFor(logoData.logo).width(300).url()}
                   alt={logoData.companyName || 'Company Logo'}
-                  fill
-                  priority // <--- LOAD INSTANTLY
-                  className='object-contain object-left'
-                  sizes='(max-width: 768px) 120px, 150px'
+                  width={160} // Explicit Width
+                  height={48} // Explicit Height
+                  priority
+                  className='object-contain object-left w-auto h-12' // CSS ensures it scales safely
                 />
               </div>
             ) : (

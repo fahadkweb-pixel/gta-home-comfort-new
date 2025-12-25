@@ -153,168 +153,176 @@ function HomeContent() {
             <div
               className={`grid grid-cols-2 ${pageData?.desktopGridCols || 'md:grid-cols-4'} gap-3 md:gap-4 auto-rows-min`}
             >
-              {loading ? (
-                <div className='col-span-2 text-center text-sm text-rose-300 py-10 animate-pulse'>
-                  Loading controls...
-                </div>
-              ) : (
-                tiles.map((tile, idx) => {
-                  const IconComponent = ICON_MAP[tile.icon] || ICON_MAP['Default'];
-                  const getTheme = (variant) => {
-                    const baseCard = 'bg-white border-slate-200 hover:border-slate-300';
-                    switch (variant) {
-                      case 'orange':
-                        return {
-                          card: baseCard,
-                          iconBox: 'bg-orange-100 text-orange-600',
-                          iconText: 'text-orange-600',
-                        };
-                      case 'blue':
-                        return {
-                          card: baseCard,
-                          iconBox: 'bg-blue-100 text-blue-600',
-                          iconText: 'text-blue-600',
-                        };
-                      case 'rose':
-                        return {
-                          card: baseCard,
-                          iconBox: 'bg-rose-100 text-rose-600',
-                          iconText: 'text-rose-600',
-                        };
-                      case 'cyan':
-                        return {
-                          card: baseCard,
-                          iconBox: 'bg-cyan-100 text-cyan-600',
-                          iconText: 'text-cyan-600',
-                        };
-                      case 'purple':
-                        return {
-                          card: baseCard,
-                          iconBox: 'bg-purple-100 text-purple-600',
-                          iconText: 'text-purple-600',
-                        };
-                      case 'amber':
-                        return {
-                          card: baseCard,
-                          iconBox: 'bg-amber-100 text-amber-600',
-                          iconText: 'text-amber-600',
-                        };
-                      default:
-                        return {
-                          card: baseCard,
-                          iconBox: 'bg-slate-100 text-slate-600',
-                          iconText: 'text-slate-600',
-                        };
-                    }
-                  };
-                  const theme = getTheme(tile.variant);
-                  const isTall = tile.layout?.includes('row-span-2');
-                  const heightClass = isTall ? 'h-80 md:h-96' : 'h-60 md:h-72';
-                  const fontWeight = tile.labelBold === false ? 'font-medium' : 'font-semibold';
-                  const forceDarkText = !!tile.backgroundImage;
-                  const getTextColor = (colorOption) => {
-                    if (forceDarkText) return { main: 'text-slate-900', sub: 'text-slate-500' };
-                    switch (colorOption) {
-                      case 'light':
-                        return { main: 'text-white', sub: 'text-slate-100/90' };
-                      case 'rose':
-                        return { main: 'text-rose-600', sub: 'text-rose-400' };
-                      case 'blue':
-                        return { main: 'text-blue-600', sub: 'text-blue-400' };
-                      default:
-                        return { main: 'text-slate-900', sub: 'text-slate-500' };
-                    }
-                  };
-                  const textStyle = getTextColor(tile.textColor);
+              {loading
+                ? // SKELETON LOADER: Renders 8 gray boxes to hold the layout open
+                  Array(8)
+                    .fill(null)
+                    .map((_, i) => (
+                      <div
+                        key={i}
+                        className='h-60 md:h-72 rounded-[32px] bg-slate-100 animate-pulse border border-slate-200'
+                      />
+                    ))
+                : tiles.map((tile, idx) => {
+                    const IconComponent = ICON_MAP[tile.icon] || ICON_MAP['Default'];
+                    const getTheme = (variant) => {
+                      const baseCard = 'bg-white border-slate-200 hover:border-slate-300';
+                      switch (variant) {
+                        case 'orange':
+                          return {
+                            card: baseCard,
+                            iconBox: 'bg-orange-100 text-orange-600',
+                            iconText: 'text-orange-600',
+                          };
+                        case 'blue':
+                          return {
+                            card: baseCard,
+                            iconBox: 'bg-blue-100 text-blue-600',
+                            iconText: 'text-blue-600',
+                          };
+                        case 'rose':
+                          return {
+                            card: baseCard,
+                            iconBox: 'bg-rose-100 text-rose-600',
+                            iconText: 'text-rose-600',
+                          };
+                        case 'cyan':
+                          return {
+                            card: baseCard,
+                            iconBox: 'bg-cyan-100 text-cyan-600',
+                            iconText: 'text-cyan-600',
+                          };
+                        case 'purple':
+                          return {
+                            card: baseCard,
+                            iconBox: 'bg-purple-100 text-purple-600',
+                            iconText: 'text-purple-600',
+                          };
+                        case 'amber':
+                          return {
+                            card: baseCard,
+                            iconBox: 'bg-amber-100 text-amber-600',
+                            iconText: 'text-amber-600',
+                          };
+                        default:
+                          return {
+                            card: baseCard,
+                            iconBox: 'bg-slate-100 text-slate-600',
+                            iconText: 'text-slate-600',
+                          };
+                      }
+                    };
+                    const theme = getTheme(tile.variant);
+                    const isTall = tile.layout?.includes('row-span-2');
+                    const heightClass = isTall ? 'h-80 md:h-96' : 'h-60 md:h-72';
+                    const fontWeight = tile.labelBold === false ? 'font-medium' : 'font-semibold';
+                    const forceDarkText = !!tile.backgroundImage;
+                    const getTextColor = (colorOption) => {
+                      if (forceDarkText) return { main: 'text-slate-900', sub: 'text-slate-500' };
+                      switch (colorOption) {
+                        case 'light':
+                          return { main: 'text-white', sub: 'text-slate-100/90' };
+                        case 'rose':
+                          return { main: 'text-rose-600', sub: 'text-rose-400' };
+                        case 'blue':
+                          return { main: 'text-blue-600', sub: 'text-blue-400' };
+                        default:
+                          return { main: 'text-slate-900', sub: 'text-slate-500' };
+                      }
+                    };
+                    const textStyle = getTextColor(tile.textColor);
 
-                  return (
-                    <button
-                      key={idx}
-                      onClick={() => handleIssueSelect(tile.label)}
-                      className={`
+                    return (
+                      <button
+                        key={idx}
+                        onClick={() => handleIssueSelect(tile.label)}
+                        className={`
                           ${tile.layout || 'col-span-1'} 
                           group relative rounded-[32px] border transition-all duration-300 
                           hover:shadow-lg hover:shadow-rose-100/20 hover:-translate-y-1 active:scale-95
                           overflow-hidden flex flex-col text-left
                           ${theme.card} ${heightClass}
                         `}
-                    >
-                      {tile.backgroundImage ? (
-                        <>
-                          <div className='relative h-[60%] w-full overflow-hidden bg-white'>
-                            {/* OPTIMIZED IMAGE: Only Priority the FIRST tile */}
-                            <Image
-                              src={urlFor(tile.backgroundImage).width(1200).url()}
-                              alt={tile.label}
-                              fill
-                              priority={idx === 0} // <--- ONLY THE FIRST IMAGE
-                              sizes='(max-width: 768px) 50vw, 25vw'
-                              className='object-cover transition-transform duration-700 group-hover:scale-105'
-                            />
-                            <div className='absolute top-4 left-4 z-10'>
-                              <div className='w-10 h-10 rounded-2xl bg-white/95 backdrop-blur-sm shadow-sm flex items-center justify-center border border-slate-100'>
-                                <IconComponent
-                                  size={20}
-                                  strokeWidth={2.5}
-                                  className={theme.iconText}
+                      >
+                        {tile.backgroundImage ? (
+                          <>
+                            <div className='relative h-[60%] w-full overflow-hidden bg-white'>
+                              {/* OPTIMIZED IMAGE: Only Priority the FIRST tile */}
+                              <Image
+                                src={urlFor(tile.backgroundImage).width(1200).url()}
+                                alt={tile.label}
+                                fill
+                                priority={idx === 0} // <--- ONLY THE FIRST IMAGE
+                                sizes='(max-width: 768px) 50vw, 25vw'
+                                className='object-cover transition-transform duration-700 group-hover:scale-105'
+                              />
+                              <div className='absolute top-4 left-4 z-10'>
+                                <div className='w-10 h-10 rounded-2xl bg-white/95 backdrop-blur-sm shadow-sm flex items-center justify-center border border-slate-100'>
+                                  <IconComponent
+                                    size={20}
+                                    strokeWidth={2.5}
+                                    className={theme.iconText}
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                            <div className='relative h-[40%] w-full px-5 flex flex-col justify-center bg-inherit border-t border-slate-50'>
+                              <span
+                                className={`block ${fontWeight} text-lg md:text-xl tracking-tight leading-none ${textStyle.main}`}
+                              >
+                                {tile.label}
+                              </span>
+                              {tile.subtitle && (
+                                <span
+                                  className={`block mt-1.5 text-[13px] font-medium opacity-90 ${textStyle.sub}`}
+                                >
+                                  {tile.subtitle}
+                                </span>
+                              )}
+                              <div className='absolute bottom-4 right-4'>
+                                <ArrowRight
+                                  size={16}
+                                  className='text-slate-300 group-hover:text-slate-900 -translate-x-2 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 transition-all duration-300'
                                 />
                               </div>
                             </div>
-                          </div>
-                          <div className='relative h-[40%] w-full px-5 flex flex-col justify-center bg-inherit border-t border-slate-50'>
-                            <span
-                              className={`block ${fontWeight} text-lg md:text-xl tracking-tight leading-none ${textStyle.main}`}
-                            >
-                              {tile.label}
-                            </span>
-                            {tile.subtitle && (
-                              <span
-                                className={`block mt-1.5 text-[13px] font-medium opacity-90 ${textStyle.sub}`}
+                          </>
+                        ) : (
+                          <div className='w-full h-full p-6 flex flex-col justify-between'>
+                            <div className='flex justify-between items-start w-full'>
+                              <div
+                                className={`w-12 h-12 rounded-2xl shadow-sm flex items-center justify-center transition-transform group-hover:scale-110 duration-300 ${theme.iconBox}`}
                               >
-                                {tile.subtitle}
-                              </span>
-                            )}
-                            <div className='absolute bottom-4 right-4'>
+                                <IconComponent
+                                  size={24}
+                                  strokeWidth={2.5}
+                                  className='currentColor'
+                                />
+                              </div>
                               <ArrowRight
-                                size={16}
-                                className='text-slate-300 group-hover:text-slate-900 -translate-x-2 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 transition-all duration-300'
+                                size={20}
+                                className={`opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 ${theme.iconText}`}
                               />
                             </div>
-                          </div>
-                        </>
-                      ) : (
-                        <div className='w-full h-full p-6 flex flex-col justify-between'>
-                          <div className='flex justify-between items-start w-full'>
-                            <div
-                              className={`w-12 h-12 rounded-2xl shadow-sm flex items-center justify-center transition-transform group-hover:scale-110 duration-300 ${theme.iconBox}`}
-                            >
-                              <IconComponent size={24} strokeWidth={2.5} className='currentColor' />
-                            </div>
-                            <ArrowRight
-                              size={20}
-                              className={`opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 ${theme.iconText}`}
-                            />
-                          </div>
-                          <div>
-                            <span
-                              className={`block ${fontWeight} text-xl md:text-2xl tracking-tight leading-none ${textStyle.main}`}
-                            >
-                              {tile.label}
-                            </span>
-                            {tile.subtitle && (
+                            <div>
                               <span
-                                className={`block mt-2 text-sm md:text-base font-medium ${textStyle.sub}`}
+                                className={`block ${fontWeight} text-xl md:text-2xl tracking-tight leading-none ${textStyle.main}`}
                               >
-                                {tile.subtitle}
+                                {tile.label}
                               </span>
-                            )}
+                              {tile.subtitle && (
+                                <span
+                                  className={`block mt-2 text-sm md:text-base font-medium ${textStyle.sub}`}
+                                >
+                                  {tile.subtitle}
+                                </span>
+                              )}
+                            </div>
                           </div>
-                        </div>
-                      )}
-                    </button>
-                  );
-                })
-              )}
+                        )}
+                      </button>
+                    );
+                  })}
             </div>
 
             <div className='h-64 md:h-72 shrink-0 mt-2'>

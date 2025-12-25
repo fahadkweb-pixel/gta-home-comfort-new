@@ -1,5 +1,7 @@
 'use client';
 
+import Image from 'next/image';
+import { urlFor } from '@/sanity/lib/image';
 import {
   CheckCircle2,
   HelpCircle,
@@ -18,11 +20,18 @@ import {
   Lightbulb,
 } from 'lucide-react';
 
-export default function ContentSections() {
+// Accept 'data' prop to get the image passed down from page.js
+export default function ContentSections({ data }) {
+  // LOGIC: Use CMS image if available, otherwise fallback to Unsplash
+  const aboutImage = data?.aboutSection?.image
+    ? urlFor(data.aboutSection.image).width(800).url()
+    : 'https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?auto=format&fit=crop&q=80&w=800';
+
+  const aboutAlt = data?.aboutSection?.imageAlt || 'HVAC Technician working';
+
   return (
     <div className='w-full max-w-5xl mx-auto space-y-24 py-12 md:py-24'>
       {/* SECTION 1: THE MANIFESTO */}
-      {/* FIX APPLIED: Removed 'order' classes so Text sits on top of Image on mobile naturally */}
       <section className='grid md:grid-cols-2 gap-12 items-center'>
         {/* TEXT COLUMN (DOM Order: 1st) */}
         <div>
@@ -68,14 +77,16 @@ export default function ContentSections() {
         </div>
 
         {/* VISUAL: Transaction vs Relationship (DOM Order: 2nd) */}
-        <div className='relative h-[500px] rounded-[32px] overflow-hidden shadow-2xl shadow-rose-900/10 group'>
-          <div
-            className='absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105'
-            style={{
-              backgroundImage:
-                'url("https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?auto=format&fit=crop&q=80&w=800")',
-            }}
+        <div className='relative h-[500px] rounded-[32px] overflow-hidden shadow-2xl shadow-rose-900/10 group bg-slate-100'>
+          {/* OPTIMIZED IMAGE */}
+          <Image
+            src={aboutImage}
+            alt={aboutAlt}
+            fill
+            className='object-cover transition-transform duration-700 group-hover:scale-105'
+            sizes='(max-width: 768px) 100vw, 50vw'
           />
+
           <div className='absolute inset-0 bg-gradient-to-t from-rose-950/90 via-rose-950/40 to-transparent' />
           <div className='absolute bottom-0 left-0 w-full p-8 space-y-4'>
             <div className='p-4 bg-white/10 backdrop-blur-md rounded-xl border border-white/10 flex items-center justify-between opacity-70'>

@@ -103,6 +103,7 @@ function HomeContent() {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        // UPDATED QUERY: Added aboutSection{ image, imageAlt }
         const data = await client.fetch(`*[_type == "homepage" && _id == "homepage"][0]{
           heading,
           subheading,
@@ -114,7 +115,8 @@ function HomeContent() {
             backgroundImage,
             textColor,
             labelBold 
-          }
+          },
+          aboutSection{ image, imageAlt }
         }`);
         if (data) {
           setPageData(data);
@@ -340,7 +342,8 @@ function HomeContent() {
             </div>
 
             <div className='pb-12 border-t border-rose-100/50 pt-8'>
-              <ContentSections />
+              {/* UPDATED COMPONENT: Passing data prop */}
+              <ContentSections data={pageData} />
             </div>
           </div>
         </div>

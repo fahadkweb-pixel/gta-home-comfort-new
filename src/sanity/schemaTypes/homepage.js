@@ -41,7 +41,6 @@ export const homepageType = defineType({
       },
       initialValue: 'text-left',
     }),
-    // --- NEW FIELD: Grid Density Control ---
     defineField({
       name: 'desktopGridCols',
       title: 'Desktop Grid Layout',
@@ -57,12 +56,38 @@ export const homepageType = defineType({
       },
       initialValue: 'md:grid-cols-4',
     }),
-    // ---------------------------------------
     defineField({
       name: 'heroTiles',
       title: 'Control Grid Tiles',
       type: 'array',
       of: [{ type: 'tile' }],
+    }),
+
+    // --- NEW SECTION: About / "Rooted in Scarborough" ---
+    defineField({
+      name: 'aboutSection',
+      title: 'About / Scarborough Section',
+      type: 'object',
+      options: {
+        collapsible: true,
+        collapsed: true,
+      },
+      fields: [
+        defineField({
+          name: 'image',
+          title: 'Section Image',
+          type: 'image',
+          description: 'The image for the "Rooted in Scarborough" block.',
+          options: { hotspot: true },
+        }),
+        defineField({
+          name: 'imageAlt',
+          title: 'Image Alt Text',
+          type: 'string',
+          description: 'Important for SEO (e.g. "HVAC technician in Scarborough")',
+          validation: (Rule) => Rule.required(),
+        }),
+      ],
     }),
   ],
 });

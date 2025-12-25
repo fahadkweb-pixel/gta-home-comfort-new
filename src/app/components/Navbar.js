@@ -56,6 +56,7 @@ const SERVICES = [
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [logoData, setLogoData] = useState(null);
+  const [loading, setLoading] = useState(true); // <--- LOADING STATE
 
   useEffect(() => {
     const fetchSettings = async () => {
@@ -64,6 +65,8 @@ export default function Navbar() {
         setLogoData(data);
       } catch (error) {
         console.error('Failed to fetch settings:', error);
+      } finally {
+        setLoading(false); // <--- STOP LOADING
       }
     };
     fetchSettings();
@@ -73,22 +76,25 @@ export default function Navbar() {
     <nav className='sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-rose-100'>
       <div className='max-w-7xl mx-auto px-6'>
         <div className='flex justify-between items-center h-20'>
-          {/* 1. LOGO LOGIC */}
+          {/* 1. LOGO LOGIC - SKELETON & DIMENSIONS */}
           <Link href='/' className='flex items-center gap-2 group'>
-            {logoData?.logo ? (
-              // A: Render Uploaded Image with EXPLICIT dimensions
+            {loading ? (
+              // SKELETON: Prevents logo flash/jump
+              <div className='h-12 w-32 bg-slate-100 animate-pulse rounded-lg' />
+            ) : logoData?.logo ? (
+              // A: Render Uploaded Image
               <div className='relative flex items-center'>
                 <Image
                   src={urlFor(logoData.logo).width(300).url()}
                   alt={logoData.companyName || 'Company Logo'}
-                  width={160} // Explicit Width
-                  height={48} // Explicit Height
+                  width={160}
+                  height={48}
                   priority
-                  className='object-contain object-left w-auto h-12' // CSS ensures it scales safely
+                  className='object-contain object-left w-auto h-12'
                 />
               </div>
             ) : (
-              // B: Fallback to Code Logo (The Flame)
+              // B: Fallback (Only shows if no logo uploaded)
               <>
                 <div className='w-10 h-10 bg-rose-500 rounded-xl flex items-center justify-center text-white shadow-lg shadow-rose-500/20 group-hover:scale-105 transition-transform'>
                   <Flame size={24} fill='white' />

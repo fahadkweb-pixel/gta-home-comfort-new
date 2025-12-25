@@ -137,14 +137,25 @@ function HomeContent() {
           <header
             className={`px-6 pt-16 pb-8 flex flex-col justify-center z-10 relative ${pageData?.headerAlignment || 'text-left'}`}
           >
-            <h1 className='text-4xl md:text-6xl font-bold tracking-tight text-slate-900 mb-6 leading-[1.1]'>
-              {pageData?.heading || 'Good Morning,'} <br />
-              <span className='text-rose-500'>{pageData?.subheading || 'Toronto.'}</span>
-            </h1>
-            {pageData?.description && (
-              <p className='text-xl md:text-2xl text-slate-600 max-w-2xl leading-relaxed font-medium opacity-90'>
-                {pageData.description}
-              </p>
+            {loading ? (
+              // LOADING SKELETON: Prevents text flash
+              <div className='space-y-4 max-w-2xl'>
+                <div className='h-12 w-3/4 bg-slate-200 animate-pulse rounded-lg' />
+                <div className='h-12 w-1/2 bg-slate-200 animate-pulse rounded-lg' />
+                <div className='h-6 w-full bg-slate-100 animate-pulse rounded-lg mt-4' />
+              </div>
+            ) : (
+              <>
+                <h1 className='text-4xl md:text-6xl font-bold tracking-tight text-slate-900 mb-6 leading-[1.1]'>
+                  {pageData?.heading || 'Good Morning,'} <br />
+                  <span className='text-rose-500'>{pageData?.subheading || 'Toronto.'}</span>
+                </h1>
+                {pageData?.description && (
+                  <p className='text-xl md:text-2xl text-slate-600 max-w-2xl leading-relaxed font-medium opacity-90'>
+                    {pageData.description}
+                  </p>
+                )}
+              </>
             )}
           </header>
 
@@ -154,7 +165,7 @@ function HomeContent() {
               className={`grid grid-cols-2 ${pageData?.desktopGridCols || 'md:grid-cols-4'} gap-3 md:gap-4 auto-rows-min`}
             >
               {loading
-                ? // SKELETON LOADER: Renders 8 gray boxes to hold the layout open
+                ? // SKELETON LOADER: Prevents layout shift
                   Array(8)
                     .fill(null)
                     .map((_, i) => (
@@ -247,12 +258,11 @@ function HomeContent() {
                         {tile.backgroundImage ? (
                           <>
                             <div className='relative h-[60%] w-full overflow-hidden bg-white'>
-                              {/* OPTIMIZED IMAGE: Only Priority the FIRST tile */}
                               <Image
                                 src={urlFor(tile.backgroundImage).width(1200).url()}
                                 alt={tile.label}
                                 fill
-                                priority={idx === 0} // <--- ONLY THE FIRST IMAGE
+                                priority={idx === 0}
                                 sizes='(max-width: 768px) 50vw, 25vw'
                                 className='object-cover transition-transform duration-700 group-hover:scale-105'
                               />

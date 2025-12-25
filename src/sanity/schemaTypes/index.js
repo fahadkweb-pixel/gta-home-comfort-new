@@ -14,6 +14,7 @@ export const schema = {
     servicePage,
     aboutPage,
     contactPage,
+    lead,
     settings, // <--- 2. Add to list
   ],
 };

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
+import { createLead } from './actions';
 import {
   ArrowRight,
   CheckCircle2,
@@ -426,11 +427,18 @@ export default function SmartQuote({ issueType, onBack }) {
               </div>
 
               <form
-                onSubmit={(e) => {
+                onSubmit={async (e) => {
                   e.preventDefault();
                   // 3. ONLY SUBMIT IF REQUIRED FIELDS ARE FILLED
-                  if (formData.name && formData.phone && formData.address)
+                  if (formData.name && formData.phone && formData.address) {
+                    // --- NEW: FIRE AND FORGET LEAD CAPTURE ---
+                    // We don't await this because we don't want to delay the UI.
+                    // It runs in the background.
+                    createLead(formData);
+
+                    // Proceed to success screen immediately
                     handleNext('contact', 'SUBMIT');
+                  }
                 }}
                 className='space-y-4'
               >

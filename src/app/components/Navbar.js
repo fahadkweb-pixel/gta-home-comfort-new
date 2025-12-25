@@ -61,7 +61,7 @@ export default function Navbar() {
   useEffect(() => {
     const fetchSettings = async () => {
       try {
-        const data = await client.fetch(`*[_type == "settings"][0]{ logo, companyName }`);
+        const data = await client.fetch(`*[_id == "settings"][0]{ logo, companyName, _updatedAt }`);
         setLogoData(data);
       } catch (error) {
         console.error('Failed to fetch settings:', error);

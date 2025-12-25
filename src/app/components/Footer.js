@@ -19,7 +19,11 @@ export default function Footer() {
   useEffect(() => {
     const fetchSettings = async () => {
       try {
-        const data = await client.fetch(`*[_type == "settings"][0]`);
+        const data = await client.fetch(`
+  *[_id in ["settings","drafts.settings"]]
+  | order(_updatedAt desc)[0]
+`);
+
         setSettings(data);
       } catch (error) {
         console.error('Failed to fetch footer settings:', error);

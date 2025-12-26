@@ -43,23 +43,23 @@ function HomeContent() {
   const [selectedIssue, setSelectedIssue] = useState(null);
 
   const quoteRef = useRef(null);
-  const deepLinkHandled = useRef(false);
+  // Ref to track if we've processed the initial load deep link
+  const deepLinkProcessed = useRef(false);
 
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  // --- CHECK URL ON LOAD ---
+  // --- CHECK URL ON LOAD & NAVIGATION ---
   useEffect(() => {
-    if (deepLinkHandled.current) return;
-
     const mode = searchParams.get('mode');
     const source = searchParams.get('source');
+    const view = searchParams.get('view');
 
+    // 1. Handle Legacy Deep Links (mode=...) - typically only on first load or external link
     if (mode) {
       if (mode === 'install') {
         setSelectedIssue('New Installation');
         setCurrentView('QUOTE');
-        deepLinkHandled.current = true;
       } else if (mode === 'repair') {
         const labelMap = {
           heating: 'Heating System',
@@ -69,10 +69,22 @@ function HomeContent() {
         };
         setSelectedIssue(labelMap[source] || 'General Repair');
         setCurrentView('QUOTE');
-        deepLinkHandled.current = true;
+      }
+      deepLinkProcessed.current = true;
+    }
+    // 2. Handle View State via URL (e.g. ?view=quote)
+    else if (view === 'quote') {
+      setCurrentView('QUOTE');
+    }
+    // 3. Default: Reset to GRID if no known params
+    else {
+      // Only reset if we aren't already in GRID to avoid unnecessary renders
+      if (currentView !== 'GRID') {
+        setSelectedIssue(null);
+        setCurrentView('GRID');
       }
     }
-  }, [searchParams]);
+  }, [searchParams, currentView]);
 
   // --- SCROLL LOGIC ---
   useEffect(() => {
@@ -89,21 +101,24 @@ function HomeContent() {
     }
   }, [currentView]);
 
-  const handleIssueSelect = useCallback((tileLabel) => {
-    setSelectedIssue(tileLabel);
-    setCurrentView('QUOTE');
-  }, []);
+  const handleIssueSelect = useCallback(
+    (tileLabel) => {
+      // 1. Set the specific issue data
+      setSelectedIssue(tileLabel);
+      // 2. Push URL state. The useEffect above will detect this change and switch currentView to 'QUOTE'.
+      router.push('/?view=quote', { scroll: false });
+    },
+    [router]
+  );
 
   const goToGrid = useCallback(() => {
-    setSelectedIssue(null);
-    setCurrentView('GRID');
+    // Navigate back to root. The useEffect will detect missing params and switch currentView to 'GRID'.
     router.replace('/', { scroll: false });
   }, [router]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // UPDATED QUERY: Added aboutSection{ image, imageAlt }
         const data = await client.fetch(`*[_type == "homepage" && _id == "homepage"][0]{
           heading,
           subheading,

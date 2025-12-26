@@ -83,31 +83,36 @@ export default async function ServicePage({ params }) {
       {/* 2. REPAIR VS REPLACE */}
       {page.showSplitSection && (
         <section className='relative z-20 -mt-20 max-w-5xl mx-auto px-6 grid md:grid-cols-2 gap-6 mb-20'>
-          <div className='bg-white p-8 rounded-[32px] shadow-xl shadow-rose-900/10 border border-white/50 hover:-translate-y-1 transition-transform duration-300'>
-            <div className='w-12 h-12 bg-rose-50 rounded-2xl flex items-center justify-center mb-4 text-rose-500'>
+          {/* REPAIR CARD */}
+          <div className='bg-white p-8 rounded-[32px] shadow-xl shadow-rose-900/10 border border-white/50 hover:-translate-y-1 transition-transform duration-300 flex flex-col h-full'>
+            <div className='w-12 h-12 bg-rose-50 rounded-2xl flex items-center justify-center mb-4 text-rose-500 shrink-0'>
               <Wrench />
             </div>
             <h3 className='text-2xl font-bold mb-2'>{page.repairTitle}</h3>
-            <p className='text-rose-900/70 mb-6 h-12'>{page.repairText}</p>
-            {/* DYNAMIC LINK: REPAIR */}
+            {/* FIX: Removed h-12 to allow text to expand naturally */}
+            <p className='text-rose-900/70 mb-6'>{page.repairText}</p>
+            {/* FIX: Added mt-auto to push button to bottom */}
             <Link
               href={`/?mode=repair&source=${slug}`}
-              className='text-rose-600 font-bold flex items-center gap-2 hover:gap-4 transition-all'
+              className='text-rose-600 font-bold flex items-center gap-2 hover:gap-4 transition-all mt-auto'
             >
               Book Repair <ArrowRight size={20} />
             </Link>
           </div>
-          <div className='bg-rose-950 text-white p-8 rounded-[32px] shadow-xl shadow-rose-900/20 relative overflow-hidden hover:-translate-y-1 transition-transform duration-300'>
+
+          {/* INSTALL CARD */}
+          <div className='bg-rose-950 text-white p-8 rounded-[32px] shadow-xl shadow-rose-900/20 relative overflow-hidden hover:-translate-y-1 transition-transform duration-300 flex flex-col h-full'>
             <div className='absolute top-0 right-0 w-64 h-64 bg-rose-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none' />
-            <div className='w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center mb-4 text-rose-200 border border-white/10'>
+            <div className='w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center mb-4 text-rose-200 border border-white/10 shrink-0'>
               <Hammer />
             </div>
             <h3 className='text-2xl font-bold mb-2'>{page.installTitle}</h3>
-            <p className='text-rose-200/80 mb-6 h-12'>{page.installText}</p>
-            {/* DYNAMIC LINK: INSTALL */}
+            {/* FIX: Removed h-12 to allow text to expand naturally */}
+            <p className='text-rose-200/80 mb-6'>{page.installText}</p>
+            {/* FIX: Added mt-auto to push button to bottom */}
             <Link
               href={`/?mode=install&source=${slug}`}
-              className='text-white font-bold flex items-center gap-2 hover:gap-4 transition-all relative z-10'
+              className='text-white font-bold flex items-center gap-2 hover:gap-4 transition-all relative z-10 mt-auto'
             >
               Get Quote <ArrowRight size={20} />
             </Link>

@@ -32,13 +32,16 @@ import {
   Video,
   ClipboardCheck,
   ThumbsUp,
-  MessageSquare, // Added for contact preference
-  Calendar, // Added for date selection
-  Building, // Added for property type
-  Key, // Added for Owner/Tenant
-  Ban, // Added for "System Not Running"
-  Sun, // Added for Morning
-  Moon, // Added for Evening
+  MessageSquare,
+  Calendar,
+  Building,
+  Key,
+  Ban,
+  Sun,
+  Moon,
+  Wrench,
+  Dog,
+  Sparkles,
 } from 'lucide-react';
 import { PopupModal, useCalendlyEventListener } from 'react-calendly';
 import GooglePlacesAutocomplete from 'react-google-places-autocomplete';
@@ -50,6 +53,7 @@ const getCategory = (label) => {
   const l = label?.toLowerCase() || '';
   if (l.includes('install') || l.includes('new') || l.includes('replace') || l.includes('quote'))
     return 'INSTALLATION';
+  if (l.includes('mainten') || l.includes('tune')) return 'MAINTENANCE';
   if (
     l.includes('purif') ||
     l.includes('humid') ||
@@ -75,6 +79,14 @@ const SYSTEM_OPTIONS = {
     },
     { id: 'TANKLESS', label: 'Tankless Water Heater', icon: <Zap className='text-yellow-500' /> },
     { id: 'TANK', label: 'Hot Water Tank', icon: <Droplets className='text-blue-500' /> },
+  ],
+  MAINTENANCE: [
+    { id: 'FURNACE', label: 'Furnace', icon: <Flame className='text-orange-500' /> },
+    { id: 'AC', label: 'Air Conditioner', icon: <Snowflake className='text-blue-400' /> },
+    { id: 'HEATPUMP', label: 'Heat Pump', icon: <Wind className='text-emerald-500' /> },
+    { id: 'BOILER', label: 'Boiler', icon: <Droplets className='text-blue-500' /> },
+    { id: 'FIREPLACE', label: 'Gas Fireplace', icon: <Flame className='text-rose-500' /> },
+    { id: 'TANKLESS', label: 'Tankless Heater', icon: <Zap className='text-yellow-500' /> },
   ],
   HEATING: [
     { id: 'FURNACE', label: 'Furnace', icon: <Flame className='text-orange-500' /> },
@@ -112,7 +124,6 @@ const SYSTEM_OPTIONS = {
   ],
 };
 
-// Helper to append "Other" option to issue lists
 const withOther = (options) => [
   ...options,
   {
@@ -124,6 +135,38 @@ const withOther = (options) => [
 ];
 
 const ISSUE_OPTIONS = {
+  MAINTENANCE_GOALS: [
+    {
+      id: 'TUNEUP',
+      label: 'Annual Tune-Up',
+      desc: 'Routine cleaning & check',
+      icon: <Wrench className='text-blue-500' />,
+    },
+    {
+      id: 'SAFETY',
+      label: 'Safety Inspection',
+      desc: 'Ensure safe operation',
+      icon: <ClipboardCheck className='text-emerald-500' />,
+    },
+    {
+      id: 'EFFICIENCY',
+      label: 'Efficiency Check',
+      desc: 'Lower energy bills',
+      icon: <Leaf className='text-green-500' />,
+    },
+    {
+      id: 'WARRANTY',
+      label: 'Warranty Requirement',
+      desc: 'Keep warranty valid',
+      icon: <div className='text-xs font-bold border-2 border-current rounded p-0.5'>W</div>,
+    },
+    {
+      id: 'OTHER',
+      label: 'Other / Not Sure',
+      desc: '',
+      icon: <HelpCircle className='text-slate-400' />,
+    },
+  ],
   DEFAULT: withOther([
     { id: 'BROKEN', label: 'Not Working', desc: "System won't turn on" },
     { id: 'NOISE', label: 'Weird Noise', desc: 'Banging, humming, or clicking' },
@@ -164,7 +207,7 @@ const ISSUE_OPTIONS = {
   ]),
 };
 
-// --- INSTALLATION DATA OPTIONS ---
+// --- DATA OPTIONS ---
 const INSTALL_SCENARIOS = [
   {
     id: 'EXISTING_SYSTEM',
@@ -207,32 +250,27 @@ const LEVELS = [
   { id: '2', label: '2 Storeys' },
   { id: '3+', label: '3+ Storeys' },
 ];
-
 const DUCTWORK = [
   { id: 'Yes', label: 'Yes, I have ducts' },
   { id: 'No', label: 'No ductwork' },
   { id: 'Not sure', label: 'Not sure' },
 ];
-
 const FUELS = [
   { id: 'Gas', label: 'Natural Gas', icon: <Flame /> },
   { id: 'Electric', label: 'Electric', icon: <Zap /> },
   { id: 'Propane', label: 'Propane / Oil', icon: <Droplets /> },
 ];
-
 const AGES = [
   { id: '<10', label: 'Under 10 Yrs' },
   { id: '10-15', label: '10 - 15 Yrs' },
   { id: '15+', label: '15+ Years' },
 ];
-
 const PRIORITIES = [
   { id: 'Lowest Price', label: 'Lowest Price', icon: <DollarSign /> },
   { id: 'Best Efficiency', label: 'Efficiency', icon: <Leaf /> },
   { id: 'Quiet', label: 'Quiet', icon: <VolumeX /> },
   { id: 'Best Comfort', label: 'Comfort', icon: <Activity /> },
 ];
-
 const TIMELINES = [
   { id: 'ASAP', label: 'ASAP (Emergency)', icon: <AlertTriangle /> },
   { id: '1-2 Weeks', label: '1-2 Weeks', icon: <CalendarCheck /> },
@@ -240,33 +278,28 @@ const TIMELINES = [
   { id: 'Just Shopping', label: 'Just Shopping', icon: <Clock /> },
 ];
 
-// --- SERVICE QUALIFIERS OPTIONS (NEW) ---
-
+// --- SERVICE QUALIFIERS ---
 const RUNNING_STATUS = [
   { id: 'Yes', label: 'Running Fine', icon: <CheckCircle2 /> },
   { id: 'No', label: 'Not Running', icon: <Ban /> },
   { id: 'Intermittent', label: 'Intermittent', icon: <Activity /> },
 ];
-
 const WHEN_STARTED = [
   { id: 'Today', label: 'Today', icon: <AlertTriangle /> },
   { id: '1-3 Days', label: '1-3 Days Ago', icon: <Calendar /> },
   { id: '1 Week+', label: 'Over a Week', icon: <Clock /> },
   { id: 'Not Sure', label: 'Not Sure', icon: <HelpCircle /> },
 ];
-
 const TENANT_STATUS = [
   { id: 'Owner', label: 'Homeowner', icon: <Key /> },
   { id: 'Tenant', label: 'Tenant', icon: <User /> },
   { id: 'Manager', label: 'Property Mgr', icon: <Building /> },
 ];
-
 const CONTACT_METHOD = [
   { id: 'Call', label: 'Phone Call', icon: <Phone /> },
   { id: 'Text', label: 'Text Message', icon: <MessageSquare /> },
   { id: 'Email', label: 'Email', icon: <Mail /> },
 ];
-
 const TIME_WINDOW = [
   { id: 'Morning', label: 'Morning', icon: <Sun /> },
   { id: 'Afternoon', label: 'Afternoon', icon: <Sun className='opacity-70' /> },
@@ -274,21 +307,55 @@ const TIME_WINDOW = [
   { id: 'Flexible', label: 'Flexible', icon: <Clock /> },
 ];
 
+// --- MAINTENANCE QUALIFIERS ---
+const SYSTEM_AGE_SIMPLE = [
+  { id: '<5', label: '< 5 Years' },
+  { id: '5-10', label: '5 - 10 Years' },
+  { id: '10-15', label: '10 - 15 Years' },
+  { id: '15+', label: '15+ Years' },
+  { id: 'Unsure', label: 'Not Sure' },
+];
+const LAST_SERVICE = [
+  { id: '<1', label: '< 1 Year Ago' },
+  { id: '1-2', label: '1 - 2 Years Ago' },
+  { id: '2+', label: '2+ Years Ago' },
+  { id: 'Unsure', label: 'Never / Not Sure' },
+];
+const ACCESS_LOCATION = [
+  { id: 'Basement', label: 'Basement' },
+  { id: 'Utility', label: 'Utility Closet' },
+  { id: 'Attic', label: 'Attic' },
+  { id: 'Garage', label: 'Garage' },
+  { id: 'Unsure', label: 'Not Sure' },
+];
+const PETS_OPTIONS = [
+  { id: 'Yes', label: 'Yes, I have pets', icon: <Dog /> },
+  { id: 'No', label: 'No pets', icon: <Ban /> },
+];
+const ADD_ONS = [
+  { id: 'Filter', label: 'Filter Replacement', icon: <Wind /> },
+  { id: 'Thermostat', label: 'Thermostat Upgrade', icon: <ThermometerSnowflake /> },
+  { id: 'Ducts', label: 'Duct Cleaning Info', icon: <Fan /> },
+  { id: 'IAQ', label: 'Air Quality Check', icon: <Sparkles /> },
+  { id: 'None', label: 'Not Interested', icon: <Ban /> },
+];
+
 export default function SmartQuote({ issueType, onBack }) {
   const containerRef = useRef(null);
 
   const initialCategory = useMemo(() => getCategory(issueType), [issueType]);
   const isInstall = initialCategory === 'INSTALLATION';
+  const isMaintenance = initialCategory === 'MAINTENANCE';
 
-  const [view, setView] = useState(isInstall ? 'WIZARD' : 'SAFETY');
+  const [view, setView] = useState(isInstall || isMaintenance ? 'WIZARD' : 'SAFETY');
   const [isUnsafe, setIsUnsafe] = useState(false);
   const [overrideEmergency, setOverrideEmergency] = useState(false);
   const [step, setStep] = useState(1);
 
   const [formData, setFormData] = useState({
     category: initialCategory,
-    system: isInstall ? [] : '',
-    issue: '',
+    system: isInstall || isMaintenance ? [] : '',
+    issue: isMaintenance ? [] : '',
     issueLabel: '',
     name: '',
     phone: '',
@@ -307,13 +374,22 @@ export default function SmartQuote({ issueType, onBack }) {
     panelSize: '',
     priority: '',
     timeline: '',
-    // NEW Service Fields
+    // Service Fields
     systemRunning: '',
     whenStarted: '',
     ownerOrTenant: '',
     preferredContact: '',
     bestTimeWindow: '',
     accessNotes: '',
+    // Maintenance Fields
+    systemAgeApprox: '',
+    lastServiceWhen: '',
+    systemRunningNormally: '',
+    accessLocation: '',
+    petsInHome: '',
+    preferredAppointmentWindow: '',
+    remindersOkByText: '',
+    addOnInterest: [],
   });
 
   // --- HELPER: CHECK IF DETAILS STEP IS NEEDED (INSTALL ONLY) ---
@@ -332,11 +408,8 @@ export default function SmartQuote({ issueType, onBack }) {
   }, [formData.installScenario, formData.system, isInstall]);
 
   // Dynamic Step Count
-  // Service: 1(Sys) -> 2(Issue) -> 3(Status) -> 4(Property) -> 5(Access) -> 6(Contact)
-  // Install: 1(Sys) -> 2(Scenario) -> 3(Home) -> [4(Details)] -> [5(Prefs)] -> 6(Contact)
   const TOTAL_STEPS = isInstall ? (isDetailsNeeded ? 6 : 5) : 6;
 
-  // --- SCROLL TO TOP ON STEP CHANGE ---
   useEffect(() => {
     if (containerRef.current) {
       containerRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -350,14 +423,14 @@ export default function SmartQuote({ issueType, onBack }) {
 
   const currentIssues = useMemo(() => {
     if (isInstall) return [];
+    if (isMaintenance) return ISSUE_OPTIONS.MAINTENANCE_GOALS;
     return ISSUE_OPTIONS[formData.system] || ISSUE_OPTIONS.DEFAULT;
-  }, [formData.system, isInstall]);
+  }, [formData.system, isInstall, isMaintenance]);
 
   // --- MAPPING LOGIC FOR STEP TITLES/SUBTITLES ---
   const getCurrentStepContent = () => {
     if (step === 1) return 'SYSTEM';
 
-    // INSTALL FLOW
     if (isInstall) {
       if (step === 2) return 'SCENARIO';
       if (step === 3) return 'HOME';
@@ -369,9 +442,14 @@ export default function SmartQuote({ issueType, onBack }) {
         if (step === 4) return 'PREFS';
         if (step === 5) return 'CONTACT';
       }
-    }
-    // SERVICE FLOW (NEW)
-    else {
+    } else if (isMaintenance) {
+      if (step === 2) return 'MAINT_GOALS';
+      if (step === 3) return 'MAINT_CONTEXT';
+      if (step === 4) return 'MAINT_HOME';
+      if (step === 5) return 'MAINT_PREFS';
+      if (step === 6) return 'CONTACT';
+    } else {
+      // SERVICE FLOW
       if (step === 2) return 'ISSUE';
       if (step === 3) return 'STATUS';
       if (step === 4) return 'PROPERTY_CONTEXT';
@@ -386,17 +464,19 @@ export default function SmartQuote({ issueType, onBack }) {
   const getStepTitle = () => {
     switch (stepContent) {
       case 'SYSTEM':
-        return isInstall ? 'What do you need?' : 'Which system?';
+        return isMaintenance
+          ? 'What needs maintenance?'
+          : isInstall
+            ? 'What do you need?'
+            : 'Which system?';
       case 'ISSUE':
-        return 'What seems to be the problem?'; // Service Step 2
+        return 'What seems to be the problem?';
       case 'STATUS':
-        return 'System Status'; // Service Step 3
+        return 'System Status';
       case 'PROPERTY_CONTEXT':
-        return 'Property Details'; // Service Step 4
+        return 'Property Details';
       case 'ACCESS':
-        return 'Access & Contact'; // Service Step 5
-
-      // Install Steps
+        return 'Access & Contact';
       case 'SCENARIO':
         return 'Current Setup';
       case 'HOME':
@@ -405,6 +485,14 @@ export default function SmartQuote({ issueType, onBack }) {
         return 'System Details';
       case 'PREFS':
         return 'Preferences';
+      case 'MAINT_GOALS':
+        return 'Main Goal?';
+      case 'MAINT_CONTEXT':
+        return 'Equipment Details';
+      case 'MAINT_HOME':
+        return 'Home & Access';
+      case 'MAINT_PREFS':
+        return 'Preferences & Extras';
       case 'CONTACT':
         return 'Last Step';
       default:
@@ -415,7 +503,9 @@ export default function SmartQuote({ issueType, onBack }) {
   const getStepSubtitle = () => {
     switch (stepContent) {
       case 'SYSTEM':
-        return isInstall ? 'Select all that apply.' : 'Select the equipment needing service.';
+        return isInstall || isMaintenance
+          ? 'Select all that apply.'
+          : 'Select the equipment needing service.';
       case 'ISSUE':
         return 'This helps us prepare the right parts.';
       case 'STATUS':
@@ -424,8 +514,6 @@ export default function SmartQuote({ issueType, onBack }) {
         return 'So we know what to expect on arrival.';
       case 'ACCESS':
         return 'How should we reach you?';
-
-      // Install Subtitles
       case 'SCENARIO':
         return 'Are we replacing or adding new?';
       case 'HOME':
@@ -434,6 +522,14 @@ export default function SmartQuote({ issueType, onBack }) {
         return 'Help us size it right (Optional).';
       case 'PREFS':
         return 'What matters most to you?';
+      case 'MAINT_GOALS':
+        return 'What do you want to accomplish today?';
+      case 'MAINT_CONTEXT':
+        return 'Help us prepare for the visit.';
+      case 'MAINT_HOME':
+        return 'Where is the equipment located?';
+      case 'MAINT_PREFS':
+        return 'Customize your appointment.';
       case 'CONTACT':
         return 'Where should we send the confirmation?';
       default:
@@ -445,51 +541,45 @@ export default function SmartQuote({ issueType, onBack }) {
     setFormData((prev) => ({ ...prev, [key]: value }));
   };
 
-  const toggleSystem = (id) => {
+  const toggleArrayItem = (key, id) => {
     setFormData((prev) => {
-      const current = prev.system || [];
+      const current = Array.isArray(prev[key]) ? prev[key] : [];
       if (current.includes(id)) {
-        return { ...prev, system: current.filter((x) => x !== id) };
+        return { ...prev, [key]: current.filter((x) => x !== id) };
       }
-      return { ...prev, system: [...current, id] };
+      return { ...prev, [key]: [...current, id] };
     });
   };
 
   // Validation Logic
   const validateStep = (currentStep, data) => {
-    // Step 1: System Required
     if (currentStep === 1) {
-      if (isInstall && (!data.system || data.system.length === 0)) {
+      if ((isInstall || isMaintenance) && (!data.system || data.system.length === 0)) {
         alert('Please select at least one system.');
         return false;
       }
-      if (!isInstall && !data.system) return false; // Should theoretically be handled by click
+      if (!isInstall && !isMaintenance && !data.system) return false;
     }
-
-    // Install Flow Validation
     if (isInstall) {
       if (currentStep === 2 && !data.installScenario) {
         alert('Please select a scenario.');
         return false;
       }
     }
-
-    // Service Flow: We want it low-friction, so mostly optional.
-    // Step 2 (Issue) is handled by click.
-    // Steps 3, 4, 5 are qualifiers and can be skipped if user hits continue without selecting?
-    // We'll allow empty states or provide skip buttons.
-
+    if (isMaintenance) {
+      if (currentStep === 2 && (!data.issue || data.issue.length === 0)) {
+        alert('Please select at least one goal.');
+        return false;
+      }
+    }
     return true;
   };
 
   const handleNext = (key, value, extraLabel = '') => {
     let nextData = { ...formData };
-    if (key) {
+    if (key && !Array.isArray(formData[key])) {
       nextData[key] = value;
       if (extraLabel) nextData.issueLabel = extraLabel;
-    }
-
-    if (key) {
       setFormData(nextData);
     }
 
@@ -510,7 +600,7 @@ export default function SmartQuote({ issueType, onBack }) {
     if (step > 1) {
       setStep((prev) => prev - 1);
     } else {
-      if (isInstall) {
+      if (isInstall || isMaintenance) {
         onBack();
       } else {
         setView('SAFETY');
@@ -518,7 +608,6 @@ export default function SmartQuote({ issueType, onBack }) {
     }
   };
 
-  // --- CONDITIONAL LOGIC FOR INSTALL DETAILS ---
   const systems = Array.isArray(formData.system) ? formData.system : [formData.system];
   const hasGasSys = systems.some((s) =>
     ['FURNACE', 'BOILER', 'TANKLESS', 'TANK', 'FIREPLACE'].includes(s)
@@ -529,8 +618,6 @@ export default function SmartQuote({ issueType, onBack }) {
   const showGasQuestion = formData.installScenario === 'NO_EXISTING_SYSTEM' && hasGasSys;
   const showElectricQuestion = formData.installScenario === 'NO_EXISTING_SYSTEM' && hasElecSys;
   const showDuctQuestion = hasDuctSys;
-
-  // --- RENDERERS ---
 
   if (view === 'SAFETY') {
     return (
@@ -545,7 +632,7 @@ export default function SmartQuote({ issueType, onBack }) {
 
   if (view === 'SUCCESS') {
     const isNoHeat = formData.issue === 'NO_HEAT';
-    if (isNoHeat && !overrideEmergency && !isInstall) {
+    if (isNoHeat && !overrideEmergency && !isInstall && !isMaintenance) {
       return (
         <EmergencyOutput
           issueLabel={formData.issueLabel}
@@ -598,7 +685,8 @@ export default function SmartQuote({ issueType, onBack }) {
               <div className='space-y-6'>
                 <div className='grid grid-cols-1 sm:grid-cols-2 gap-3'>
                   {currentSystems.map((opt) => {
-                    const isSelected = isInstall
+                    const isMulti = isInstall || isMaintenance;
+                    const isSelected = isMulti
                       ? formData.system.includes(opt.id)
                       : formData.system === opt.id;
                     return (
@@ -608,8 +696,8 @@ export default function SmartQuote({ issueType, onBack }) {
                         title={opt.label}
                         selected={isSelected}
                         onClick={() => {
-                          if (isInstall) {
-                            toggleSystem(opt.id);
+                          if (isMulti) {
+                            toggleArrayItem('system', opt.id);
                           } else {
                             handleNext('system', opt.id);
                           }
@@ -618,7 +706,7 @@ export default function SmartQuote({ issueType, onBack }) {
                     );
                   })}
                 </div>
-                {isInstall && (
+                {(isInstall || isMaintenance) && (
                   <ContinueButton
                     onClick={() => handleNext()}
                     disabled={formData.system.length === 0}
@@ -658,7 +746,135 @@ export default function SmartQuote({ issueType, onBack }) {
               </div>
             )}
 
-            {/* 3. SERVICE: STATUS (NEW) */}
+            {/* 2. MAINTENANCE: GOALS */}
+            {stepContent === 'MAINT_GOALS' && (
+              <div className='space-y-6'>
+                <div className='grid grid-cols-1 gap-3'>
+                  {currentIssues.map((opt) => (
+                    <SelectionTile
+                      key={opt.id}
+                      title={opt.label}
+                      desc={opt.desc}
+                      icon={opt.icon}
+                      selected={formData.issue.includes(opt.id)}
+                      onClick={() => toggleArrayItem('issue', opt.id)}
+                    />
+                  ))}
+                </div>
+                <ContinueButton
+                  onClick={() => handleNext()}
+                  disabled={formData.issue.length === 0}
+                />
+              </div>
+            )}
+
+            {/* 3. MAINTENANCE: SYSTEM CONTEXT */}
+            {stepContent === 'MAINT_CONTEXT' && (
+              <div className='space-y-8'>
+                <TileGroup
+                  label='Approximate Age'
+                  options={SYSTEM_AGE_SIMPLE}
+                  value={formData.systemAgeApprox}
+                  onChange={(val) => updateField('systemAgeApprox', val)}
+                  cols={3}
+                />
+                <TileGroup
+                  label='Last Service'
+                  options={LAST_SERVICE}
+                  value={formData.lastServiceWhen}
+                  onChange={(val) => updateField('lastServiceWhen', val)}
+                />
+                <TileGroup
+                  label='Is it running normally?'
+                  options={RUNNING_STATUS}
+                  value={formData.systemRunningNormally}
+                  onChange={(val) => updateField('systemRunningNormally', val)}
+                  cols={3}
+                />
+                <div className='space-y-2 pt-2'>
+                  <ContinueButton onClick={() => handleNext()} />
+                  <SkipButton onClick={() => handleNext()} />
+                </div>
+              </div>
+            )}
+
+            {/* 4. MAINTENANCE: HOME CONTEXT */}
+            {stepContent === 'MAINT_HOME' && (
+              <div className='space-y-8'>
+                <TileGroup
+                  label='Property Type'
+                  options={[
+                    ...PROPERTY_TYPES,
+                    { id: 'Apartment', label: 'Apartment', icon: <Building /> },
+                  ]}
+                  value={formData.propertyType}
+                  onChange={(val) => updateField('propertyType', val)}
+                />
+                <TileGroup
+                  label='Equipment Location'
+                  options={ACCESS_LOCATION}
+                  value={formData.accessLocation}
+                  onChange={(val) => updateField('accessLocation', val)}
+                  cols={3}
+                />
+                <TileGroup
+                  label='Pets in Home?'
+                  options={PETS_OPTIONS}
+                  value={formData.petsInHome}
+                  onChange={(val) => updateField('petsInHome', val)}
+                  cols={2}
+                />
+                <div className='space-y-2 pt-2'>
+                  <ContinueButton onClick={() => handleNext()} />
+                  <SkipButton onClick={() => handleNext()} />
+                </div>
+              </div>
+            )}
+
+            {/* 5. MAINTENANCE: PREFS & ADD-ONS */}
+            {stepContent === 'MAINT_PREFS' && (
+              <div className='space-y-8'>
+                <TileGroup
+                  label='Preferred Time Window'
+                  options={TIME_WINDOW}
+                  value={formData.preferredAppointmentWindow}
+                  onChange={(val) => updateField('preferredAppointmentWindow', val)}
+                />
+                <TileGroup
+                  label='Text Reminders?'
+                  options={[
+                    { id: 'Yes', label: 'Yes' },
+                    { id: 'No', label: 'No' },
+                  ]}
+                  value={formData.remindersOkByText}
+                  onChange={(val) => updateField('remindersOkByText', val)}
+                  cols={2}
+                />
+                <div className='animate-in slide-in-from-bottom-2 duration-500'>
+                  <div className='text-xs font-bold text-rose-900/60 uppercase tracking-widest mb-3 ml-1 flex justify-between'>
+                    <span>Interested in Add-ons?</span>
+                    <span className='text-rose-400 opacity-70'>(Optional)</span>
+                  </div>
+                  <div className='grid grid-cols-1 sm:grid-cols-2 gap-3'>
+                    {ADD_ONS.map((opt) => (
+                      <SelectionTile
+                        key={opt.id}
+                        title={opt.label}
+                        icon={opt.icon}
+                        selected={formData.addOnInterest.includes(opt.id)}
+                        onClick={() => toggleArrayItem('addOnInterest', opt.id)}
+                      />
+                    ))}
+                  </div>
+                </div>
+                <div className='space-y-2 pt-2'>
+                  <ContinueButton onClick={() => handleNext()} />
+                  <SkipButton onClick={() => handleNext()} />
+                </div>
+              </div>
+            )}
+
+            {/* 3. SERVICE: STATUS */}
             {stepContent === 'STATUS' && (
               <div className='space-y-8'>
                 <TileGroup
@@ -681,7 +897,7 @@ export default function SmartQuote({ issueType, onBack }) {
               </div>
             )}
 
-            {/* 4. SERVICE: PROPERTY CONTEXT (NEW) */}
+            {/* 4. SERVICE: PROPERTY CONTEXT */}
             {stepContent === 'PROPERTY_CONTEXT' && (
               <div className='space-y-8'>
                 <TileGroup
@@ -707,7 +923,7 @@ export default function SmartQuote({ issueType, onBack }) {
               </div>
             )}
 
-            {/* 5. SERVICE: ACCESS (NEW) */}
+            {/* 5. SERVICE: ACCESS */}
             {stepContent === 'ACCESS' && (
               <div className='space-y-8'>
                 <TileGroup
@@ -876,7 +1092,7 @@ export default function SmartQuote({ issueType, onBack }) {
   );
 }
 
-// --- SUB-COMPONENTS (UNCHANGED) ---
+// --- SUB-COMPONENTS ---
 
 function SelectionTile({ icon, title, desc, selected, onClick, className = '' }) {
   return (

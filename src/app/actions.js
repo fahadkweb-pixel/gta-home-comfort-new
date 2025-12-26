@@ -20,7 +20,20 @@ export async function createLead(formData) {
   }
 
   try {
-    // --- 2. PRIVACY: SAVE AS DRAFT ---
+    // --- Helper: Convert Arrays to Strings ---
+    const formatList = (val) => (Array.isArray(val) ? val.join(', ') : val);
+
+    // --- Helper: Format Tech Specs ---
+    // Combine gas/panel/brand info into one readable string if they exist
+    const getTechSpecs = () => {
+      const parts = [];
+      if (formData.hasGasToHome) parts.push(`Gas: ${formData.hasGasToHome}`);
+      if (formData.panelSize) parts.push(`Panel: ${formData.panelSize}`);
+      if (formData.existingBrand) parts.push(`Brand: ${formData.existingBrand}`);
+      return parts.join(' | ');
+    };
+
+    // --- 2. PREPARE DOCUMENT ---
     // We generate a custom ID starting with "drafts.".
     // This makes the document "invisible" to public API queries.
     // Only authenticated users (YOU) can see it in the Studio.
@@ -29,19 +42,60 @@ export async function createLead(formData) {
     const doc = {
       _id: safeId, // <--- Forces Draft Mode
       _type: 'lead',
+
+      // Core Data
+      status: 'new',
+      submittedAt: new Date().toISOString(),
+      category: formData.category, // INSTALLATION, SERVICE, MAINTENANCE
+
+      // Contact
       name: formData.name,
       phone: formData.phone,
       email: formData.email || 'Not provided',
       address: formData.address,
-      serviceType: `${formData.category} - ${formData.issueLabel}`,
-      submittedAt: new Date().toISOString(),
-      status: 'new',
+
+      // High Level Context
+      // If "issue" is an array (Maintenance), join it. If string (Service/Repair), use label.
+      serviceType: Array.isArray(formData.issue)
+        ? formatList(formData.issue)
+        : formData.issueLabel || 'General Inquiry',
+
+      selectedSystems: formatList(formData.system),
+
+      // Property Context
+      propertyType: formData.propertyType,
+      ownerOrTenant: formData.ownerOrTenant,
+      sqftRange: formData.sqftRange,
+      levels: formData.levels,
+      accessLocation: formData.accessLocation,
+      petsInHome: formData.petsInHome,
+      accessNotes: formData.accessNotes,
+
+      // System / Technical
+      installScenario: formData.installScenario,
+      // Map both "systemRunning" (Service) and "systemRunningNormally" (Maint) to one field
+      systemStatus: formData.systemRunning || formData.systemRunningNormally,
+      issueStart: formData.whenStarted,
+      // Map both "existingAge" (Install) and "systemAgeApprox" (Maint)
+      systemAge: formData.existingAge || formData.systemAgeApprox,
+      lastService: formData.lastServiceWhen,
+      fuelType: formData.existingFuel,
+      ductwork: formData.ductwork,
+      technicalDetails: getTechSpecs(),
+
+      // Preferences
+      priority: formData.priority,
+      timeline: formData.timeline,
+      preferredContact:
+        formData.preferredContact || (formData.remindersOkByText === 'Yes' ? 'Text OK' : ''),
+      preferredTime: formData.bestTimeWindow || formData.preferredAppointmentWindow,
+      addOns: formatList(formData.addOnInterest),
     };
 
     await writeClient.create(doc);
     return { success: true };
   } catch (error) {
     console.error('Sanity Write Error:', error);
-    return { success: true };
+    return { success: true }; // Fail silently to user, log on server
   }
 }

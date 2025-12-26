@@ -4,7 +4,10 @@ import Link from 'next/link';
 import { Phone, Mail, MapPin, Calculator, ArrowRight } from 'lucide-react';
 
 async function getContactData() {
-  return client.fetch(`*[_type == "contactPage" && _id == "contactPage"][0]`);
+  return client.fetch(`
+  *[_id in ["contactPage","drafts.contactPage"]]
+  | order(_updatedAt desc)[0]
+`);
 }
 
 export default async function ContactPage() {
@@ -49,7 +52,7 @@ export default async function ContactPage() {
               <h2 className='text-2xl font-bold mb-2'>Need a Price?</h2>
               <p className='text-rose-200/80 mb-8 flex-1'>{data.quoteCardText}</p>
               <Link
-                href='/'
+                href={`/?mode=install&source=contact`}
                 className='flex items-center gap-2 text-white font-bold text-lg group-hover:gap-4 transition-all'
               >
                 Launch Smart Quoter <ArrowRight size={20} />

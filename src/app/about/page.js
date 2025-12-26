@@ -6,7 +6,10 @@ import Link from 'next/link';
 
 // Fetch Data
 async function getAboutData() {
-  return client.fetch(`*[_type == "aboutPage" && _id == "aboutPage"][0]`);
+  return client.fetch(`
+  *[_id in ["aboutPage","drafts.aboutPage"]]
+  | order(_updatedAt desc)[0]
+`);
 }
 
 export default async function AboutPage() {

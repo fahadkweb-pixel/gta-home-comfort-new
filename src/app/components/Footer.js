@@ -19,10 +19,15 @@ export default function Footer() {
   useEffect(() => {
     const fetchSettings = async () => {
       try {
+        // FIX: Added footerLogo to the fetch query
         const data = await client.fetch(`
-  *[_id in ["settings","drafts.settings"]]
-  | order(_updatedAt desc)[0]
-`);
+          *[_id in ["settings","drafts.settings"]]
+          | order(_updatedAt desc)[0]{
+            ...,
+            logo,
+            footerLogo
+          }
+        `);
 
         setSettings(data);
       } catch (error) {
@@ -34,6 +39,9 @@ export default function Footer() {
 
   const currentYear = new Date().getFullYear();
 
+  // FIX: Determine which logo to show (Prioritize footerLogo, fallback to logo)
+  const displayLogo = settings?.footerLogo || settings?.logo;
+
   return (
     <footer className='bg-slate-900 text-slate-300 border-t border-slate-800'>
       <div className='max-w-7xl mx-auto px-6 pt-16 pb-8'>
@@ -41,9 +49,9 @@ export default function Footer() {
           {/* COLUMN 1: BRAND & INFO */}
           <div className='col-span-1 md:col-span-1'>
             <Link href='/' className='flex items-center gap-2 mb-6 group'>
-              {settings?.logo ? (
+              {displayLogo ? (
                 <img
-                  src={urlFor(settings.logo).height(60).url()}
+                  src={urlFor(displayLogo).height(60).url()}
                   alt='Logo'
                   className='h-10 w-auto opacity-90 group-hover:opacity-100 transition-opacity'
                 />

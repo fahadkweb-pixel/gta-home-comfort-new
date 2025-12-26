@@ -14,7 +14,15 @@ export const settings = defineType({
     }),
     defineField({
       name: 'logo',
-      title: 'Navigation Logo',
+      title: 'Navigation Logo (Light Background)',
+      type: 'image',
+      options: { hotspot: true },
+    }),
+    // FIX: Added separate Footer Logo field
+    defineField({
+      name: 'footerLogo',
+      title: 'Footer Logo (Dark Background)',
+      description: 'Upload a white/light version of the logo for the dark footer background.',
       type: 'image',
       options: { hotspot: true },
     }),

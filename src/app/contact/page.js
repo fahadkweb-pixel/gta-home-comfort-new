@@ -3,6 +3,28 @@ import { urlFor } from '@/sanity/lib/image'; // <--- 1. Import urlFor
 import Link from 'next/link';
 import { Phone, Mail, MapPin, Calculator, ArrowRight } from 'lucide-react';
 
+// --- NEW: SEO METADATA GENERATOR ---
+export async function generateMetadata() {
+  const data = await getContactData();
+
+  if (!data) return { title: 'Contact Us | GTA Home Comfort' };
+
+  // Fallback if SEO fields are empty in Sanity
+  const pageTitle = data.seoTitle || 'Contact Us | GTA Home Comfort';
+  const pageDesc =
+    data.seoDescription ||
+    'Get in touch with GTA Home Comfort for all your heating, cooling, and air quality needs in the GTA.';
+
+  return {
+    title: pageTitle,
+    description: pageDesc,
+    openGraph: {
+      title: pageTitle,
+      description: pageDesc,
+      images: data.seoImage ? [urlFor(data.seoImage).width(1200).height(630).url()] : [],
+    },
+  };
+}
 async function getContactData() {
   return client.fetch(`
   *[_id in ["contactPage","drafts.contactPage"]]

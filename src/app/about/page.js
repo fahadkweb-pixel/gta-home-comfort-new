@@ -4,6 +4,28 @@ import { ShieldCheck, Heart, Clock, Users } from 'lucide-react';
 import { PortableText } from '@portabletext/react';
 import Link from 'next/link';
 
+// --- NEW: SEO METADATA GENERATOR ---
+export async function generateMetadata() {
+  const data = await getAboutData();
+
+  if (!data) return { title: 'About Us | GTA Home Comfort' };
+
+  // Fallback if SEO fields are empty in Sanity
+  const pageTitle = data.seoTitle || 'About Us | GTA Home Comfort';
+  const pageDesc =
+    data.seoDescription ||
+    'Learn more about GTA Home Comfort and our commitment to providing top-quality HVAC services in Toronto.';
+
+  return {
+    title: pageTitle,
+    description: pageDesc,
+    openGraph: {
+      title: pageTitle,
+      description: pageDesc,
+      images: data.seoImage ? [urlFor(data.seoImage).width(1200).height(630).url()] : [],
+    },
+  };
+}
 // Fetch Data
 async function getAboutData() {
   return client.fetch(`

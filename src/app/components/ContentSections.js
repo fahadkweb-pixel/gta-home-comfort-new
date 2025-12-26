@@ -44,20 +44,23 @@ export default function ContentSections({ data }) {
             <span className='text-rose-500'>we wanted to hire.</span>
           </h2>
           <p className='text-xl text-rose-900/60 leading-relaxed mb-6'>
-            We are GTA Home Comfort. We're a family-run team of second-generation technicians based
-            right here in Scarborough.
+            We’re GTA Home Comfort, a local HVAC team serving homes across the Greater Toronto Area.
           </p>
           <p className='text-rose-900/60 leading-relaxed mb-8'>
-            We grew up seeing the industry's flaws: the 8-hour waiting windows, the commission-based
-            sales pitches, and the mystery invoices.
+            We started this company after seeing too many homeowners deal with long wait times,
+            unclear pricing, and services that felt more confusing than helpful.
             <br />
             <br />
-            So we rebuilt it. We operate on a salary-based model (no commissions) and use digital
-            diagnostics to prove every repair is necessary.
+            So we built something better.
             <br />
             <br />
-            We aren't just another company looking for a sale. We're your neighbors, and we want to
-            help like a neighbor would. <strong>That's the GTA Way.</strong>
+            Our focus is simple: show up when we say we will, explain what’s going on clearly, and
+            fix what actually needs fixing. No pressure, no runaround — just straightforward service
+            you can trust. <br />
+            <br />
+            We’re not here for one-time jobs or quick wins. We’re here to take care of our community
+            and help homeowners feel confident about their comfort systems.{' '}
+            <strong>That’s the GTA Way.</strong>{' '}
           </p>
 
           <div className='flex gap-6 text-sm font-semibold text-rose-950'>
@@ -200,8 +203,8 @@ export default function ContentSections({ data }) {
               Don't pay us yet.
             </h2>
             <p className='text-xl text-rose-900/60 leading-relaxed'>
-              We weren't kidding. 30% of "No Heat" calls are simple fixes you can do in 5 minutes.
-              Check these three things before you book a dispatch.
+              We weren't kidding about wanting to save you money. 30% of "No Heat" calls are simple
+              fixes you can do in 5 minutes. Check these three things before you book a dispatch.
             </p>
           </div>
         </div>

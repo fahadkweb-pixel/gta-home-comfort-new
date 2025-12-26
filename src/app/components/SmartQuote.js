@@ -180,12 +180,12 @@ export default function SmartQuote({ issueType, onBack }) {
   const getStepTitle = () => {
     if (step === 1) {
       return formData.category === 'INSTALLATION'
-        ? 'What are we installing?'
+        ? 'What would you like a quote for?'
         : 'Which system do you have?';
     }
     if (step === 2) {
       return formData.category === 'INSTALLATION'
-        ? 'Installation Type'
+        ? 'Tell us about your current setup'
         : 'What seems to be the problem?';
     }
     return 'Almost done.';
@@ -198,7 +198,7 @@ export default function SmartQuote({ issueType, onBack }) {
         : 'Select the equipment that needs service.';
     if (step === 2)
       return formData.category === 'INSTALLATION'
-        ? 'Is this a replacement or a new addition?'
+        ? 'Are you replacing an existing system or adding a new one?'
         : 'This helps us prepare the right parts.';
     return 'Where should we send the booking confirmation?';
   };

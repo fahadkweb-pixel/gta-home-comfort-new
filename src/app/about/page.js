@@ -8,7 +8,7 @@ import Link from 'next/link';
 async function getAboutData() {
   return client.fetch(`
   *[_id in ["aboutPage","drafts.aboutPage"]]
-  | order(_updatedAt desc)[0]
+  | order(_updatedAt desc)[0] 
 `);
 }
 

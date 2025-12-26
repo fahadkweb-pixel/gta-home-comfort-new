@@ -4,29 +4,64 @@ export const homepageType = defineType({
   name: 'homepage',
   title: 'Homepage Setup',
   type: 'document',
+  // 1. Define the Groups (Tabs)
+  groups: [
+    { name: 'content', title: 'Page Content', default: true },
+    { name: 'seo', title: 'SEO & Social' },
+  ],
   fields: [
+    // --- SEO FIELDS (New Group) ---
+    defineField({
+      name: 'seoTitle',
+      title: 'SEO Title',
+      type: 'string',
+      description: 'Title for Google (e.g., "GTA Home Comfort | Heating & Cooling Experts")',
+      group: 'seo',
+    }),
+    defineField({
+      name: 'seoDescription',
+      title: 'Meta Description',
+      type: 'text',
+      rows: 3,
+      description: 'Short summary for search engines and social previews.',
+      group: 'seo',
+    }),
+    defineField({
+      name: 'seoImage',
+      title: 'Social Share Image',
+      type: 'image',
+      description: 'The image displayed when sharing the website on Facebook, LinkedIn, etc.',
+      options: { hotspot: true },
+      group: 'seo',
+    }),
+
+    // --- CONTENT FIELDS (Existing) ---
     defineField({
       name: 'title',
       title: 'Internal Title',
       type: 'string',
       initialValue: 'Home Control Panel',
       readOnly: true,
+      group: 'content',
     }),
     defineField({
       name: 'heading',
       title: 'Main Heading',
       type: 'string',
+      group: 'content',
     }),
     defineField({
       name: 'subheading',
       title: 'Highlighted Subheading',
       type: 'string',
+      group: 'content',
     }),
     defineField({
       name: 'description',
       title: 'Intro Paragraph',
       type: 'text',
       rows: 3,
+      group: 'content',
     }),
     defineField({
       name: 'headerAlignment',
@@ -40,6 +75,7 @@ export const homepageType = defineType({
         layout: 'radio',
       },
       initialValue: 'text-left',
+      group: 'content',
     }),
     defineField({
       name: 'desktopGridCols',
@@ -55,15 +91,17 @@ export const homepageType = defineType({
         layout: 'radio',
       },
       initialValue: 'md:grid-cols-4',
+      group: 'content',
     }),
     defineField({
       name: 'heroTiles',
       title: 'Control Grid Tiles',
       type: 'array',
       of: [{ type: 'tile' }],
+      group: 'content',
     }),
 
-    // --- NEW SECTION: About / "Rooted in Scarborough" ---
+    // --- About / "Rooted in Scarborough" ---
     defineField({
       name: 'aboutSection',
       title: 'About / Scarborough Section',
@@ -72,6 +110,7 @@ export const homepageType = defineType({
         collapsible: true,
         collapsed: true,
       },
+      group: 'content',
       fields: [
         defineField({
           name: 'image',

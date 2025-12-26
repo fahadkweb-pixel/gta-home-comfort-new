@@ -59,7 +59,8 @@ export default async function ServicePage({ params }) {
   return (
     <main className='min-h-screen bg-[#FDF8F6] text-rose-950 selection:bg-rose-200'>
       {/* 1. HERO */}
-      <section className='relative h-[55vh] flex items-center justify-center overflow-hidden bg-rose-900'>
+      {/* FIX: Changed h-[55vh] to min-h-[60vh] to handle larger text/screens better */}
+      <section className='relative min-h-[60vh] flex items-center justify-center overflow-hidden bg-rose-900'>
         {page.heroImage && (
           <div className='absolute inset-0 z-0 opacity-40'>
             <img
@@ -70,7 +71,8 @@ export default async function ServicePage({ params }) {
             <div className='absolute inset-0 bg-gradient-to-b from-rose-950/50 to-rose-950/80' />
           </div>
         )}
-        <div className='relative z-10 text-center max-w-4xl px-6 pt-10'>
+        {/* FIX: Added pb-24 to reserve space for the -mt-20 card overlap below */}
+        <div className='relative z-10 text-center max-w-4xl px-6 pt-10 pb-24'>
           <h1 className='text-4xl md:text-6xl font-bold text-white mb-6 tracking-tight drop-shadow-lg'>
             {page.heroHeading}
           </h1>
@@ -89,9 +91,7 @@ export default async function ServicePage({ params }) {
               <Wrench />
             </div>
             <h3 className='text-2xl font-bold mb-2'>{page.repairTitle}</h3>
-            {/* FIX: Removed h-12 to allow text to expand naturally */}
             <p className='text-rose-900/70 mb-6'>{page.repairText}</p>
-            {/* FIX: Added mt-auto to push button to bottom */}
             <Link
               href={`/?mode=repair&source=${slug}`}
               className='text-rose-600 font-bold flex items-center gap-2 hover:gap-4 transition-all mt-auto'
@@ -107,9 +107,7 @@ export default async function ServicePage({ params }) {
               <Hammer />
             </div>
             <h3 className='text-2xl font-bold mb-2'>{page.installTitle}</h3>
-            {/* FIX: Removed h-12 to allow text to expand naturally */}
             <p className='text-rose-200/80 mb-6'>{page.installText}</p>
-            {/* FIX: Added mt-auto to push button to bottom */}
             <Link
               href={`/?mode=install&source=${slug}`}
               className='text-white font-bold flex items-center gap-2 hover:gap-4 transition-all relative z-10 mt-auto'

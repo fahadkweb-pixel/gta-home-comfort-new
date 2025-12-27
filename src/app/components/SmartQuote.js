@@ -445,7 +445,7 @@ export default function SmartQuote({ issueType, onBack }) {
       if (step === 2) return 'MAINT_GOALS';
       if (step === 3) return 'MAINT_CONTEXT';
       if (step === 4) return 'MAINT_HOME';
-      if (step === 5) return 'CONTACT'; // Step 5 is now CONTACT
+      if (step === 5) return 'CONTACT'; // Removed MAINT_PREFS
     } else {
       // SERVICE FLOW (REFINED)
       if (step === 2) return 'ISSUE'; // Multi-Select
@@ -469,7 +469,7 @@ export default function SmartQuote({ issueType, onBack }) {
       case 'ISSUE':
         return 'What seems to be the problem?';
       case 'PROPERTY_CONTEXT':
-        return 'Property Details';
+        return 'Equipment & Property Details'; // UPDATED TITLE
       // Install
       case 'SCENARIO':
         return 'Current Setup';
@@ -797,9 +797,16 @@ export default function SmartQuote({ issueType, onBack }) {
               </div>
             )}
 
-            {/* 3. SERVICE: PROPERTY CONTEXT */}
+            {/* 3. SERVICE: PROPERTY CONTEXT (UPDATED TITLE & CONTENT) */}
             {stepContent === 'PROPERTY_CONTEXT' && (
               <div className='space-y-8'>
+                <TileGroup
+                  label='Equipment Age' // UPDATED LABEL
+                  options={SYSTEM_AGE_SIMPLE}
+                  value={formData.systemAgeApprox}
+                  onChange={(val) => updateField('systemAgeApprox', val)}
+                  cols={3}
+                />
                 <TileGroup
                   label='Property Type'
                   options={[
@@ -810,10 +817,10 @@ export default function SmartQuote({ issueType, onBack }) {
                   onChange={(val) => updateField('propertyType', val)}
                 />
                 <TileGroup
-                  label='Are you the owner?'
-                  options={TENANT_STATUS}
-                  value={formData.ownerOrTenant}
-                  onChange={(val) => updateField('ownerOrTenant', val)}
+                  label='Equipment Location'
+                  options={ACCESS_LOCATION}
+                  value={formData.accessLocation}
+                  onChange={(val) => updateField('accessLocation', val)}
                   cols={3}
                 />
                 <div className='space-y-2 pt-2'>
@@ -823,7 +830,7 @@ export default function SmartQuote({ issueType, onBack }) {
               </div>
             )}
 
-            {/* 3. INSTALL: HOME & LAYOUT (Optional) */}
+            {/* 3. INSTALL: HOME & LAYOUT (UPDATED) */}
             {stepContent === 'HOME' && (
               <div className='space-y-8'>
                 <TileGroup
@@ -831,6 +838,13 @@ export default function SmartQuote({ issueType, onBack }) {
                   options={PROPERTY_TYPES}
                   value={formData.propertyType}
                   onChange={(val) => updateField('propertyType', val)}
+                />
+                <TileGroup
+                  label='Are you the owner?'
+                  options={TENANT_STATUS}
+                  value={formData.ownerOrTenant}
+                  onChange={(val) => updateField('ownerOrTenant', val)}
+                  cols={3}
                 />
                 <TileGroup
                   label='Approx Sq. Footage'
@@ -846,15 +860,6 @@ export default function SmartQuote({ issueType, onBack }) {
                   onChange={(val) => updateField('levels', val)}
                   cols={3}
                 />
-                {showDuctQuestion && (
-                  <TileGroup
-                    label='Existing Ductwork'
-                    options={DUCTWORK}
-                    value={formData.ductwork}
-                    onChange={(val) => updateField('ductwork', val)}
-                    cols={3}
-                  />
-                )}
                 <div className='space-y-2 pt-2'>
                   <ContinueButton onClick={() => handleNext()} />
                   <SkipButton onClick={() => handleNext()} />

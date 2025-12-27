@@ -2,7 +2,10 @@
 
 import { createClient } from 'next-sanity';
 import { apiVersion, dataset, projectId } from '@/sanity/env';
+import { Resend } from 'resend'; // Import Resend
+import { AdminEmail, CustomerEmail } from './emails/templates'; // Import Templates
 
+// Initialize Clients
 const writeClient = createClient({
   projectId,
   dataset,
@@ -10,6 +13,8 @@ const writeClient = createClient({
   useCdn: false,
   token: process.env.SANITY_API_WRITE_TOKEN,
 });
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function createLead(formData) {
   // --- 1. SECURITY: HONEYPOT CHECK ---
@@ -33,10 +38,8 @@ export async function createLead(formData) {
 
     // --- 2. PREPARE DOCUMENT ---
     const doc = {
-      _id: `drafts.${crypto.randomUUID()}`, // Draft mode
+      _id: `drafts.${crypto.randomUUID()}`,
       _type: 'lead',
-
-      // Core Data
       status: 'new',
       submittedAt: new Date().toISOString(),
       category: formData.category,
@@ -45,14 +48,12 @@ export async function createLead(formData) {
       name: formData.name,
       phone: formData.phone,
       email: formData.email || 'Not provided',
-      address: formData.address, // This now includes postal code from SmartQuote logic
+      address: formData.address,
 
       // High Level Context
-      // If "issue" is array (Maint/Service), join it. If string, use label.
       serviceType: Array.isArray(formData.issue)
         ? formatList(formData.issue)
         : formData.issueLabel || 'General Inquiry',
-
       selectedSystems: formatList(formData.system),
 
       // Property Context
@@ -68,7 +69,6 @@ export async function createLead(formData) {
       installScenario: formData.installScenario,
       systemStatus: formData.systemRunning || formData.systemRunningNormally,
       issueStart: formData.whenStarted,
-      // Map both "existingAge" (Install) and "systemAgeApprox" (Maint/Service)
       systemAge: formData.existingAge || formData.systemAgeApprox,
       lastService: formData.lastServiceWhen,
       fuelType: formData.existingFuel,
@@ -83,10 +83,33 @@ export async function createLead(formData) {
       addOns: formatList(formData.addOnInterest),
     };
 
+    // --- 3. SAVE TO SANITY ---
     await writeClient.create(doc);
+
+    // --- 4. SEND EMAILS ---
+
+    // A. Send Notification to YOU (Admin)
+    await resend.emails.send({
+      from: 'GTA Website <system@gtahomecomfort.com>', // Use your verified domain
+      to: ['info@gtahomecomfort.com'], // Where you want to receive leads
+      subject: `🔥 New Lead: ${formData.name} (${formData.category})`,
+      react: AdminEmail({ data: formData }),
+    });
+
+    // B. Send Confirmation to CUSTOMER
+    if (formData.email && formData.email.includes('@')) {
+      await resend.emails.send({
+        from: 'GTA Home Comfort <info@gtahomecomfort.com>', // Must be verified in Resend
+        to: [formData.email],
+        subject: 'We received your request - GTA Home Comfort',
+        react: CustomerEmail({ data: formData }),
+      });
+    }
+
     return { success: true };
   } catch (error) {
-    console.error('Sanity Write Error:', error);
+    console.error('Submission Error:', error);
+    // Even if email fails, we return success if Sanity worked (or fail gracefully)
     return { success: true };
   }
 }

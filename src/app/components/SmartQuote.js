@@ -42,9 +42,9 @@ import {
   Wrench,
   Dog,
   Sparkles,
+  Map, // Added for Postal Code icon
 } from 'lucide-react';
 import { PopupModal, useCalendlyEventListener } from 'react-calendly';
-import GooglePlacesAutocomplete from 'react-google-places-autocomplete';
 import { createLead } from '../actions';
 
 // --- CONFIGURATION: LOGIC MAPS ---
@@ -256,7 +256,6 @@ const DUCTWORK = [
   { id: 'Not sure', label: 'Not sure' },
 ];
 
-// UPDATE: Added "Not Sure" to FUELS and AGES for Install flow
 const FUELS = [
   { id: 'Gas', label: 'Natural Gas', icon: <Flame /> },
   { id: 'Electric', label: 'Electric', icon: <Zap /> },
@@ -284,7 +283,6 @@ const TIMELINES = [
   { id: 'Just Shopping', label: 'Just Shopping', icon: <Clock /> },
 ];
 
-// --- QUALIFIERS ---
 const TENANT_STATUS = [
   { id: 'Owner', label: 'Homeowner', icon: <Key /> },
   { id: 'Tenant', label: 'Tenant', icon: <User /> },
@@ -302,7 +300,6 @@ const TIME_WINDOW = [
   { id: 'Flexible', label: 'Flexible', icon: <Clock /> },
 ];
 
-// --- MAINTENANCE QUALIFIERS ---
 const SYSTEM_AGE_SIMPLE = [
   { id: '<5', label: '< 5 Years' },
   { id: '5-10', label: '5 - 10 Years' },
@@ -332,6 +329,13 @@ const RUNNING_STATUS = [
   { id: 'No', label: 'Not Running', icon: <Ban /> },
   { id: 'Intermittent', label: 'Intermittent', icon: <Activity /> },
 ];
+const ADD_ONS = [
+  { id: 'Filter', label: 'Filter Replacement', icon: <Wind /> },
+  { id: 'Thermostat', label: 'Thermostat Upgrade', icon: <ThermometerSnowflake /> },
+  { id: 'Ducts', label: 'Duct Cleaning Info', icon: <Fan /> },
+  { id: 'IAQ', label: 'Air Quality Check', icon: <Sparkles /> },
+  { id: 'None', label: 'Not Interested', icon: <Ban /> },
+];
 
 export default function SmartQuote({ issueType, onBack }) {
   const containerRef = useRef(null);
@@ -340,14 +344,12 @@ export default function SmartQuote({ issueType, onBack }) {
   const isInstall = initialCategory === 'INSTALLATION';
   const isMaintenance = initialCategory === 'MAINTENANCE';
 
-  // Default view is ALWAYS 'WIZARD', Safety Check removed
   const [view, setView] = useState('WIZARD');
   const [overrideEmergency, setOverrideEmergency] = useState(false);
   const [step, setStep] = useState(1);
 
   const [formData, setFormData] = useState({
     category: initialCategory,
-    // Service 'issue' is multi-select
     system: [],
     issue: [],
     issueLabel: '',
@@ -355,8 +357,8 @@ export default function SmartQuote({ issueType, onBack }) {
     phone: '',
     email: '',
     address: '',
+    postalCode: '', // NEW FIELD
     bot_field: '',
-    // Install Fields
     installScenario: '',
     propertyType: '',
     sqftRange: '',
@@ -368,22 +370,18 @@ export default function SmartQuote({ issueType, onBack }) {
     panelSize: '',
     priority: '',
     timeline: '',
-    // Service/Maint Fields
     ownerOrTenant: '',
     preferredContact: '',
     bestTimeWindow: '',
     accessNotes: '',
-    // Maintenance Specific
     systemAgeApprox: '',
     lastServiceWhen: '',
     systemRunningNormally: '',
     accessLocation: '',
     petsInHome: '',
-    // Removed maintenance pref fields
     addOnInterest: [],
   });
 
-  // --- HELPER: CHECK IF DETAILS STEP IS NEEDED (INSTALL ONLY) ---
   const isDetailsNeeded = useMemo(() => {
     if (!isInstall) return false;
     if (formData.installScenario === 'EXISTING_SYSTEM') return true;
@@ -398,15 +396,10 @@ export default function SmartQuote({ issueType, onBack }) {
     return false;
   }, [formData.installScenario, formData.system, isInstall]);
 
-  // Dynamic Step Count
-  // Service: 1(Sys) -> 2(Issue Multi) -> 3(Property) -> 4(Contact)
-  // Install: 1(Sys) -> 2(Scenario) -> 3(Home) -> [4(Details)] -> [5(Prefs)] -> 6(Contact)
-  // Maint:   1(Sys) -> 2(Goals) -> 3(Context) -> 4(Home) -> 5(Contact) [REMOVED PREFS]
-
   const TOTAL_STEPS = useMemo(() => {
     if (isInstall) return isDetailsNeeded ? 6 : 5;
-    if (isMaintenance) return 5; // Reduced from 6 (removed prefs)
-    return 4; // Service reduced to 4
+    if (isMaintenance) return 5;
+    return 4;
   }, [isInstall, isMaintenance, isDetailsNeeded]);
 
   useEffect(() => {
@@ -423,10 +416,9 @@ export default function SmartQuote({ issueType, onBack }) {
   const currentIssues = useMemo(() => {
     if (isInstall) return [];
     if (isMaintenance) return ISSUE_OPTIONS.MAINTENANCE_GOALS;
-    return ISSUE_OPTIONS[formData.system[0]] || ISSUE_OPTIONS.DEFAULT; // Use first selected system for issue defaults
+    return ISSUE_OPTIONS[formData.system[0]] || ISSUE_OPTIONS.DEFAULT;
   }, [formData.system, isInstall, isMaintenance]);
 
-  // --- MAPPING LOGIC FOR STEP TITLES/SUBTITLES ---
   const getCurrentStepContent = () => {
     if (step === 1) return 'SYSTEM';
 
@@ -445,12 +437,11 @@ export default function SmartQuote({ issueType, onBack }) {
       if (step === 2) return 'MAINT_GOALS';
       if (step === 3) return 'MAINT_CONTEXT';
       if (step === 4) return 'MAINT_HOME';
-      if (step === 5) return 'CONTACT'; // Removed MAINT_PREFS
+      if (step === 5) return 'CONTACT';
     } else {
-      // SERVICE FLOW (REFINED)
-      if (step === 2) return 'ISSUE'; // Multi-Select
+      if (step === 2) return 'ISSUE';
       if (step === 3) return 'PROPERTY_CONTEXT';
-      if (step === 4) return 'CONTACT'; // Includes Method Preference
+      if (step === 4) return 'CONTACT';
     }
     return 'UNKNOWN';
   };
@@ -465,12 +456,10 @@ export default function SmartQuote({ issueType, onBack }) {
           : isInstall
             ? 'What do you need?'
             : 'Which system?';
-      // Service
       case 'ISSUE':
         return 'What seems to be the problem?';
       case 'PROPERTY_CONTEXT':
-        return 'Equipment & Property Details'; // UPDATED TITLE
-      // Install
+        return 'Equipment & Property Details';
       case 'SCENARIO':
         return 'Current Setup';
       case 'HOME':
@@ -479,14 +468,12 @@ export default function SmartQuote({ issueType, onBack }) {
         return 'System Details';
       case 'PREFS':
         return 'Preferences';
-      // Maintenance
       case 'MAINT_GOALS':
         return 'Main Goal?';
       case 'MAINT_CONTEXT':
         return 'Equipment Details';
       case 'MAINT_HOME':
         return 'Home & Access';
-
       case 'CONTACT':
         return 'Last Step';
       default:
@@ -498,12 +485,10 @@ export default function SmartQuote({ issueType, onBack }) {
     switch (stepContent) {
       case 'SYSTEM':
         return 'Select all that apply.';
-      // Service
       case 'ISSUE':
         return 'Select all that apply.';
       case 'PROPERTY_CONTEXT':
         return 'So we know what to expect on arrival.';
-      // Install
       case 'SCENARIO':
         return 'Are we replacing or adding new?';
       case 'HOME':
@@ -512,14 +497,12 @@ export default function SmartQuote({ issueType, onBack }) {
         return 'Help us size it right (Optional).';
       case 'PREFS':
         return 'What matters most to you?';
-      // Maintenance
       case 'MAINT_GOALS':
         return 'What do you want to accomplish today?';
       case 'MAINT_CONTEXT':
         return 'Help us prepare for the visit.';
       case 'MAINT_HOME':
         return 'Where is the equipment located?';
-
       case 'CONTACT':
         return 'Where should we send the confirmation?';
       default:
@@ -531,7 +514,6 @@ export default function SmartQuote({ issueType, onBack }) {
     setFormData((prev) => ({ ...prev, [key]: value }));
   };
 
-  // Generic Toggle for Arrays (System, AddOns, Maint Goals, Service Issues)
   const toggleArrayItem = (key, id) => {
     setFormData((prev) => {
       const current = Array.isArray(prev[key]) ? prev[key] : [];
@@ -542,39 +524,30 @@ export default function SmartQuote({ issueType, onBack }) {
     });
   };
 
-  // Validation Logic
   const validateStep = (currentStep, data) => {
-    // Step 1: System Required (All flows Multi)
     if (currentStep === 1) {
       if (!data.system || data.system.length === 0) {
         alert('Please select at least one system.');
         return false;
       }
     }
-
-    // Install Flow Validation
     if (isInstall) {
       if (currentStep === 2 && !data.installScenario) {
         alert('Please select a scenario.');
         return false;
       }
     }
-
-    // Service & Maintenance Flow: Step 2 Issue/Goal Required
     if (!isInstall && currentStep === 2) {
       if (!data.issue || data.issue.length === 0) {
         alert('Please select at least one option.');
         return false;
       }
     }
-
     return true;
   };
 
   const handleNext = (key, value, extraLabel = '') => {
     let nextData = { ...formData };
-
-    // Direct set if key provided (mostly for single-select tiles)
     if (key && !Array.isArray(formData[key])) {
       nextData[key] = value;
       if (extraLabel) nextData.issueLabel = extraLabel;
@@ -611,7 +584,6 @@ export default function SmartQuote({ issueType, onBack }) {
   const showDuctQuestion = hasDuctSys;
 
   if (view === 'SUCCESS') {
-    // FIX: Removed emergency output for No Heat. Standard booking only.
     return <BookingOutput contactData={formData} onBack={onBack} />;
   }
 
@@ -801,7 +773,7 @@ export default function SmartQuote({ issueType, onBack }) {
             {stepContent === 'PROPERTY_CONTEXT' && (
               <div className='space-y-8'>
                 <TileGroup
-                  label='Equipment Age' // UPDATED LABEL
+                  label='Equipment Age'
                   options={SYSTEM_AGE_SIMPLE}
                   value={formData.systemAgeApprox}
                   onChange={(val) => updateField('systemAgeApprox', val)}
@@ -951,7 +923,12 @@ export default function SmartQuote({ issueType, onBack }) {
                 formData={formData}
                 setFormData={setFormData}
                 onSubmit={() => {
-                  createLead(formData);
+                  // Combine address and postal code for backend/sanity context
+                  const submissionData = {
+                    ...formData,
+                    address: `${formData.address}, ${formData.postalCode}`,
+                  };
+                  createLead(submissionData);
                   handleNext('contact', 'SUBMIT');
                 }}
               />
@@ -1086,35 +1063,7 @@ function ContactForm({ formData, setFormData, onSubmit }) {
         onChange={(e) => setFormData((prev) => ({ ...prev, bot_field: e.target.value }))}
       />
 
-      <div className='relative group z-50'>
-        <MapPin className='absolute left-4 top-[18px] z-10 w-5 h-5 text-rose-300' />
-        <div className='google-places-autocomplete-wrapper'>
-          <GooglePlacesAutocomplete
-            apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY}
-            selectProps={{
-              value: formData.address ? { label: formData.address, value: formData.address } : null,
-              onChange: (val) => setFormData((prev) => ({ ...prev, address: val.label })),
-              placeholder: 'Service Address (Start Typing...)',
-              styles: {
-                control: (provided) => ({
-                  ...provided,
-                  borderRadius: '1rem',
-                  border: '1px solid rgba(255, 255, 255, 0.4)',
-                  backgroundColor: 'rgba(255, 255, 255, 0.5)',
-                  paddingLeft: '40px',
-                  paddingBlock: '6px',
-                  boxShadow: 'none',
-                  '&:hover': { borderColor: '#fecdd3' },
-                }),
-                input: (provided) => ({ ...provided, color: '#4c0519' }),
-                placeholder: (provided) => ({ ...provided, color: '#fda4af' }),
-                singleValue: (provided) => ({ ...provided, color: '#4c0519' }),
-              },
-            }}
-          />
-        </div>
-      </div>
-
+      {/* 1. Name First */}
       <div className='relative group'>
         <User className='absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-rose-300' />
         <input
@@ -1124,9 +1073,39 @@ function ContactForm({ formData, setFormData, onSubmit }) {
           onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
           className='w-full p-4 pl-12 bg-white/50 border border-white/40 rounded-2xl text-rose-950 placeholder:text-rose-300 outline-none focus:bg-white focus:ring-2 focus:ring-rose-500/20 transition-all'
           required
+          autoComplete='name'
         />
       </div>
 
+      {/* 2. Address (Standard Input) */}
+      <div className='relative group z-50'>
+        <MapPin className='absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-rose-300' />
+        <input
+          type='text'
+          placeholder='Service Address'
+          value={formData.address}
+          onChange={(e) => setFormData((prev) => ({ ...prev, address: e.target.value }))}
+          className='w-full p-4 pl-12 bg-white/50 border border-white/40 rounded-2xl text-rose-950 placeholder:text-rose-300 outline-none focus:bg-white focus:ring-2 focus:ring-rose-500/20 transition-all'
+          required
+          autoComplete='street-address'
+        />
+      </div>
+
+      {/* 3. Postal Code (New Field) */}
+      <div className='relative group'>
+        <Map className='absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-rose-300' />
+        <input
+          type='text'
+          placeholder='Postal Code'
+          value={formData.postalCode}
+          onChange={(e) => setFormData((prev) => ({ ...prev, postalCode: e.target.value }))}
+          className='w-full p-4 pl-12 bg-white/50 border border-white/40 rounded-2xl text-rose-950 placeholder:text-rose-300 outline-none focus:bg-white focus:ring-2 focus:ring-rose-500/20 transition-all uppercase'
+          required
+          autoComplete='postal-code'
+        />
+      </div>
+
+      {/* 4. Phone */}
       <div className='relative group'>
         <Phone className='absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-rose-300' />
         <input
@@ -1136,9 +1115,11 @@ function ContactForm({ formData, setFormData, onSubmit }) {
           onChange={(e) => setFormData((prev) => ({ ...prev, phone: e.target.value }))}
           className='w-full p-4 pl-12 bg-white/50 border border-white/40 rounded-2xl text-rose-950 placeholder:text-rose-300 outline-none focus:bg-white focus:ring-2 focus:ring-rose-500/20 transition-all'
           required
+          autoComplete='tel'
         />
       </div>
 
+      {/* 5. Email */}
       <div className='relative group'>
         <Mail className='absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-rose-300' />
         <input
@@ -1148,6 +1129,7 @@ function ContactForm({ formData, setFormData, onSubmit }) {
           onChange={(e) => setFormData((prev) => ({ ...prev, email: e.target.value }))}
           className='w-full p-4 pl-12 bg-white/50 border border-white/40 rounded-2xl text-rose-950 placeholder:text-rose-300 outline-none focus:bg-white focus:ring-2 focus:ring-rose-500/20 transition-all'
           required
+          autoComplete='email'
         />
       </div>
 
@@ -1338,7 +1320,7 @@ function BookingOutput({ contactData, onBack }) {
             lastName: contactData.name.split(' ').slice(1).join(' '), // Split Last
             smsReminderNumber: contactData.phone, // Pass Phone for SMS
             customAnswers: {
-              a1: contactData.address,
+              a1: `${contactData.address}, ${contactData.postalCode}`, // Combined Address + Postal Code
               a2: contactData.phone, // Backup Custom Answer
             },
           }}

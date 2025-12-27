@@ -77,7 +77,7 @@ export default async function ContactPage() {
                 href={`/?mode=install&source=contact`}
                 className='flex items-center gap-2 text-white font-bold text-lg group-hover:gap-4 transition-all'
               >
-                Launch Smart Quoter <ArrowRight size={20} />
+                Get a Free Quote <ArrowRight size={20} />
               </Link>
             </div>
           </div>

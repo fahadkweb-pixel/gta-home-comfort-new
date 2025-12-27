@@ -13,9 +13,9 @@ const inter = Inter({
 });
 
 export const metadata = {
-  title: 'GTA Home Comfort | HVAC Services in Toronto & GTA', // Default fallback
+  title: 'GTA Home Comfort | HVAC, Heating & Cooling Services Toronto', // Default fallback
   description:
-    'Family-owned HVAC experts in Scarborough. Repairs, Installations, and Maintenance for Furnaces, AC, and Heat Pumps. Call 416-678-2131.',
+    'Trusted HVAC experts serving Toronto & the GTA. Furnace, AC, water heaters & air quality services. Fast, honest, local service.',
   metadataBase: new URL('https://gtahomecomfort.com'),
   openGraph: {
     type: 'website',

@@ -13,20 +13,17 @@ const inter = Inter({
 });
 
 export const metadata = {
-  title: {
-    default: 'GTA Home Comfort | HVAC, Heating & Cooling Services Toronto',
-    template: '%s | GTA Home Comfort',
-  },
+  title: 'GTA Home Comfort | HVAC Services in Toronto & GTA', // Default fallback
   description:
-    'Trusted HVAC experts serving Toronto & the GTA. Furnace, AC, water heaters & air quality services. Fast, honest, local service.',
+    'Family-owned HVAC experts in Scarborough. Repairs, Installations, and Maintenance for Furnaces, AC, and Heat Pumps. Call 416-678-2131.',
+  metadataBase: new URL('https://gtahomecomfort.com'),
   openGraph: {
-    title: 'GTA Home Comfort | HVAC, Heating & Cooling Services Toronto',
-    description:
-      'Trusted HVAC experts serving Toronto & the GTA. Furnace, AC, water heaters & air quality services. Fast, honest, local service.',
     type: 'website',
+    locale: 'en_CA',
+    url: 'https://gtahomecomfort.com',
+    siteName: 'GTA Home Comfort',
   },
 };
-
 export default function RootLayout({ children }) {
   return (
     <html lang='en'>

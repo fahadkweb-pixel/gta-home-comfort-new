@@ -180,7 +180,12 @@ export default function Footer() {
           </div>
           <div className='flex gap-6'>
             <span>TSSA License #00000000</span>
-            <span>Privacy Policy</span>
+            <Link
+              href='/privacy'
+              className='text-xs text-slate-500 hover:text-rose-500 transition-colors'
+            >
+              Privacy Policy
+            </Link>
           </div>
         </div>
       </div>

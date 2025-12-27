@@ -5,7 +5,6 @@ export default {
   title: 'Inbound Leads',
   type: 'document',
   icon: User,
-  // Group fields in the Sanity Studio UI for better readability
   fieldsets: [
     { name: 'details', title: 'Lead Details' },
     { name: 'property', title: 'Property & Access' },
@@ -43,7 +42,7 @@ export default {
     },
     {
       name: 'serviceType',
-      title: 'Primary Issue / Goal', // e.g. "HEATING - NO HEAT" or "Tune-Up, Safety"
+      title: 'Primary Issue / Goal', // e.g. "Annual Tune-Up" or "No Heat"
       type: 'string',
       readOnly: true,
     },

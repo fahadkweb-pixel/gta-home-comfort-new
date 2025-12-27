@@ -3,12 +3,11 @@
 import { createClient } from 'next-sanity';
 import { apiVersion, dataset, projectId } from '@/sanity/env';
 
-// Initialize the client with the WRITE token
 const writeClient = createClient({
   projectId,
   dataset,
   apiVersion,
-  useCdn: false, // We need fresh data for writes
+  useCdn: false,
   token: process.env.SANITY_API_WRITE_TOKEN,
 });
 
@@ -24,7 +23,6 @@ export async function createLead(formData) {
     const formatList = (val) => (Array.isArray(val) ? val.join(', ') : val);
 
     // --- Helper: Format Tech Specs ---
-    // Combine gas/panel/brand info into one readable string if they exist
     const getTechSpecs = () => {
       const parts = [];
       if (formData.hasGasToHome) parts.push(`Gas: ${formData.hasGasToHome}`);
@@ -34,28 +32,23 @@ export async function createLead(formData) {
     };
 
     // --- 2. PREPARE DOCUMENT ---
-    // We generate a custom ID starting with "drafts.".
-    // This makes the document "invisible" to public API queries.
-    // Only authenticated users (YOU) can see it in the Studio.
-    const safeId = `drafts.${crypto.randomUUID()}`;
-
     const doc = {
-      _id: safeId, // <--- Forces Draft Mode
+      _id: `drafts.${crypto.randomUUID()}`, // Draft mode
       _type: 'lead',
 
       // Core Data
       status: 'new',
       submittedAt: new Date().toISOString(),
-      category: formData.category, // INSTALLATION, SERVICE, MAINTENANCE
+      category: formData.category,
 
       // Contact
       name: formData.name,
       phone: formData.phone,
       email: formData.email || 'Not provided',
-      address: formData.address,
+      address: formData.address, // This now includes postal code from SmartQuote logic
 
       // High Level Context
-      // If "issue" is an array (Maintenance), join it. If string (Service/Repair), use label.
+      // If "issue" is array (Maint/Service), join it. If string, use label.
       serviceType: Array.isArray(formData.issue)
         ? formatList(formData.issue)
         : formData.issueLabel || 'General Inquiry',
@@ -73,10 +66,9 @@ export async function createLead(formData) {
 
       // System / Technical
       installScenario: formData.installScenario,
-      // Map both "systemRunning" (Service) and "systemRunningNormally" (Maint) to one field
       systemStatus: formData.systemRunning || formData.systemRunningNormally,
       issueStart: formData.whenStarted,
-      // Map both "existingAge" (Install) and "systemAgeApprox" (Maint)
+      // Map both "existingAge" (Install) and "systemAgeApprox" (Maint/Service)
       systemAge: formData.existingAge || formData.systemAgeApprox,
       lastService: formData.lastServiceWhen,
       fuelType: formData.existingFuel,
@@ -86,8 +78,7 @@ export async function createLead(formData) {
       // Preferences
       priority: formData.priority,
       timeline: formData.timeline,
-      preferredContact:
-        formData.preferredContact || (formData.remindersOkByText === 'Yes' ? 'Text OK' : ''),
+      preferredContact: formData.preferredContact,
       preferredTime: formData.bestTimeWindow || formData.preferredAppointmentWindow,
       addOns: formatList(formData.addOnInterest),
     };
@@ -96,6 +87,6 @@ export async function createLead(formData) {
     return { success: true };
   } catch (error) {
     console.error('Sanity Write Error:', error);
-    return { success: true }; // Fail silently to user, log on server
+    return { success: true };
   }
 }

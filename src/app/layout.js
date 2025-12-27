@@ -4,6 +4,7 @@ import Navbar from './components/Navbar';
 import TrustBar from './components/TrustBar';
 import Footer from './components/Footer';
 import Analytics from './components/Analytics'; // <--- Import your wrapper
+import CookieBanner from './components/CookieBanner';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -38,7 +39,9 @@ export default function RootLayout({ children }) {
         <TrustBar />
         <Navbar />
         <main className='flex-1 w-full relative z-0'>{children}</main>
+
         <Footer />
+        <CookieBanner />
       </body>
     </html>
   );

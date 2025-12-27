@@ -255,16 +255,22 @@ const DUCTWORK = [
   { id: 'No', label: 'No ductwork' },
   { id: 'Not sure', label: 'Not sure' },
 ];
+
+// UPDATE: Added "Not Sure" to FUELS and AGES for Install flow
 const FUELS = [
   { id: 'Gas', label: 'Natural Gas', icon: <Flame /> },
   { id: 'Electric', label: 'Electric', icon: <Zap /> },
   { id: 'Propane', label: 'Propane / Oil', icon: <Droplets /> },
+  { id: 'Not Sure', label: 'Not Sure', icon: <HelpCircle /> },
 ];
+
 const AGES = [
   { id: '<10', label: 'Under 10 Yrs' },
   { id: '10-15', label: '10 - 15 Yrs' },
   { id: '15+', label: '15+ Years' },
+  { id: 'Not Sure', label: 'Not Sure' },
 ];
+
 const PRIORITIES = [
   { id: 'Lowest Price', label: 'Lowest Price', icon: <DollarSign /> },
   { id: 'Best Efficiency', label: 'Efficiency', icon: <Leaf /> },
@@ -326,13 +332,6 @@ const RUNNING_STATUS = [
   { id: 'No', label: 'Not Running', icon: <Ban /> },
   { id: 'Intermittent', label: 'Intermittent', icon: <Activity /> },
 ];
-const ADD_ONS = [
-  { id: 'Filter', label: 'Filter Replacement', icon: <Wind /> },
-  { id: 'Thermostat', label: 'Thermostat Upgrade', icon: <ThermometerSnowflake /> },
-  { id: 'Ducts', label: 'Duct Cleaning Info', icon: <Fan /> },
-  { id: 'IAQ', label: 'Air Quality Check', icon: <Sparkles /> },
-  { id: 'None', label: 'Not Interested', icon: <Ban /> },
-];
 
 export default function SmartQuote({ issueType, onBack }) {
   const containerRef = useRef(null);
@@ -341,14 +340,14 @@ export default function SmartQuote({ issueType, onBack }) {
   const isInstall = initialCategory === 'INSTALLATION';
   const isMaintenance = initialCategory === 'MAINTENANCE';
 
-  // FIX 1: Default view is ALWAYS 'WIZARD', remove Safety Check entirely
+  // Default view is ALWAYS 'WIZARD', Safety Check removed
   const [view, setView] = useState('WIZARD');
   const [overrideEmergency, setOverrideEmergency] = useState(false);
   const [step, setStep] = useState(1);
 
   const [formData, setFormData] = useState({
     category: initialCategory,
-    // FIX 2: Service 'issue' is now multi-select (array) like Install/Maint systems
+    // Service 'issue' is multi-select
     system: [],
     issue: [],
     issueLabel: '',
@@ -380,8 +379,7 @@ export default function SmartQuote({ issueType, onBack }) {
     systemRunningNormally: '',
     accessLocation: '',
     petsInHome: '',
-    preferredAppointmentWindow: '',
-    remindersOkByText: '',
+    // Removed maintenance pref fields
     addOnInterest: [],
   });
 
@@ -403,12 +401,12 @@ export default function SmartQuote({ issueType, onBack }) {
   // Dynamic Step Count
   // Service: 1(Sys) -> 2(Issue Multi) -> 3(Property) -> 4(Contact)
   // Install: 1(Sys) -> 2(Scenario) -> 3(Home) -> [4(Details)] -> [5(Prefs)] -> 6(Contact)
-  // Maint:   1(Sys) -> 2(Goals) -> 3(Context) -> 4(Home) -> 5(Prefs) -> 6(Contact)
+  // Maint:   1(Sys) -> 2(Goals) -> 3(Context) -> 4(Home) -> 5(Contact) [REMOVED PREFS]
 
   const TOTAL_STEPS = useMemo(() => {
     if (isInstall) return isDetailsNeeded ? 6 : 5;
-    if (isMaintenance) return 6;
-    return 4; // Service reduced to 4 steps
+    if (isMaintenance) return 5; // Reduced from 6 (removed prefs)
+    return 4; // Service reduced to 4
   }, [isInstall, isMaintenance, isDetailsNeeded]);
 
   useEffect(() => {
@@ -447,8 +445,7 @@ export default function SmartQuote({ issueType, onBack }) {
       if (step === 2) return 'MAINT_GOALS';
       if (step === 3) return 'MAINT_CONTEXT';
       if (step === 4) return 'MAINT_HOME';
-      if (step === 5) return 'MAINT_PREFS';
-      if (step === 6) return 'CONTACT';
+      if (step === 5) return 'CONTACT'; // Step 5 is now CONTACT
     } else {
       // SERVICE FLOW (REFINED)
       if (step === 2) return 'ISSUE'; // Multi-Select
@@ -489,8 +486,6 @@ export default function SmartQuote({ issueType, onBack }) {
         return 'Equipment Details';
       case 'MAINT_HOME':
         return 'Home & Access';
-      case 'MAINT_PREFS':
-        return 'Preferences & Extras';
 
       case 'CONTACT':
         return 'Last Step';
@@ -524,8 +519,6 @@ export default function SmartQuote({ issueType, onBack }) {
         return 'Help us prepare for the visit.';
       case 'MAINT_HOME':
         return 'Where is the equipment located?';
-      case 'MAINT_PREFS':
-        return 'Customize your appointment.';
 
       case 'CONTACT':
         return 'Where should we send the confirmation?';
@@ -618,17 +611,7 @@ export default function SmartQuote({ issueType, onBack }) {
   const showDuctQuestion = hasDuctSys;
 
   if (view === 'SUCCESS') {
-    const isNoHeat = formData.issue.includes('NO_HEAT');
-    // Emergency logic only applies to Service flow
-    if (isNoHeat && !overrideEmergency && !isInstall && !isMaintenance) {
-      return (
-        <EmergencyOutput
-          issueLabel={formData.issueLabel}
-          onBack={onBack}
-          onBookAnyway={() => setOverrideEmergency(true)}
-        />
-      );
-    }
+    // FIX: Removed emergency output for No Heat. Standard booking only.
     return <BookingOutput contactData={formData} onBack={onBack} />;
   }
 
@@ -807,49 +790,6 @@ export default function SmartQuote({ issueType, onBack }) {
                   onChange={(val) => updateField('petsInHome', val)}
                   cols={2}
                 />
-                <div className='space-y-2 pt-2'>
-                  <ContinueButton onClick={() => handleNext()} />
-                  <SkipButton onClick={() => handleNext()} />
-                </div>
-              </div>
-            )}
-
-            {/* 5. MAINTENANCE: PREFS & ADD-ONS */}
-            {stepContent === 'MAINT_PREFS' && (
-              <div className='space-y-8'>
-                <TileGroup
-                  label='Preferred Time Window'
-                  options={TIME_WINDOW}
-                  value={formData.preferredAppointmentWindow}
-                  onChange={(val) => updateField('preferredAppointmentWindow', val)}
-                />
-                <TileGroup
-                  label='Text Reminders?'
-                  options={[
-                    { id: 'Yes', label: 'Yes' },
-                    { id: 'No', label: 'No' },
-                  ]}
-                  value={formData.remindersOkByText}
-                  onChange={(val) => updateField('remindersOkByText', val)}
-                  cols={2}
-                />
-                <div className='animate-in slide-in-from-bottom-2 duration-500'>
-                  <div className='text-xs font-bold text-rose-900/60 uppercase tracking-widest mb-3 ml-1 flex justify-between'>
-                    <span>Interested in Add-ons?</span>
-                    <span className='text-rose-400 opacity-70'>(Optional)</span>
-                  </div>
-                  <div className='grid grid-cols-1 sm:grid-cols-2 gap-3'>
-                    {ADD_ONS.map((opt) => (
-                      <SelectionTile
-                        key={opt.id}
-                        title={opt.label}
-                        icon={opt.icon}
-                        selected={formData.addOnInterest.includes(opt.id)}
-                        onClick={() => toggleArrayItem('addOnInterest', opt.id)}
-                      />
-                    ))}
-                  </div>
-                </div>
                 <div className='space-y-2 pt-2'>
                   <ContinueButton onClick={() => handleNext()} />
                   <SkipButton onClick={() => handleNext()} />
@@ -1206,7 +1146,6 @@ function ContactForm({ formData, setFormData, onSubmit }) {
         />
       </div>
 
-      {/* PREFERRED CONTACT METHOD - ADDED HERE */}
       <div className='animate-in slide-in-from-bottom-2 duration-500'>
         <div className='text-xs font-bold text-rose-900/60 uppercase tracking-widest mb-2 ml-1'>
           Preferred Contact Method

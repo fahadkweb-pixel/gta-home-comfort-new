@@ -278,18 +278,7 @@ const TIMELINES = [
   { id: 'Just Shopping', label: 'Just Shopping', icon: <Clock /> },
 ];
 
-// --- SERVICE QUALIFIERS ---
-const RUNNING_STATUS = [
-  { id: 'Yes', label: 'Running Fine', icon: <CheckCircle2 /> },
-  { id: 'No', label: 'Not Running', icon: <Ban /> },
-  { id: 'Intermittent', label: 'Intermittent', icon: <Activity /> },
-];
-const WHEN_STARTED = [
-  { id: 'Today', label: 'Today', icon: <AlertTriangle /> },
-  { id: '1-3 Days', label: '1-3 Days Ago', icon: <Calendar /> },
-  { id: '1 Week+', label: 'Over a Week', icon: <Clock /> },
-  { id: 'Not Sure', label: 'Not Sure', icon: <HelpCircle /> },
-];
+// --- QUALIFIERS ---
 const TENANT_STATUS = [
   { id: 'Owner', label: 'Homeowner', icon: <Key /> },
   { id: 'Tenant', label: 'Tenant', icon: <User /> },
@@ -332,6 +321,11 @@ const PETS_OPTIONS = [
   { id: 'Yes', label: 'Yes, I have pets', icon: <Dog /> },
   { id: 'No', label: 'No pets', icon: <Ban /> },
 ];
+const RUNNING_STATUS = [
+  { id: 'Yes', label: 'Running Fine', icon: <CheckCircle2 /> },
+  { id: 'No', label: 'Not Running', icon: <Ban /> },
+  { id: 'Intermittent', label: 'Intermittent', icon: <Activity /> },
+];
 const ADD_ONS = [
   { id: 'Filter', label: 'Filter Replacement', icon: <Wind /> },
   { id: 'Thermostat', label: 'Thermostat Upgrade', icon: <ThermometerSnowflake /> },
@@ -347,15 +341,16 @@ export default function SmartQuote({ issueType, onBack }) {
   const isInstall = initialCategory === 'INSTALLATION';
   const isMaintenance = initialCategory === 'MAINTENANCE';
 
-  const [view, setView] = useState(isInstall || isMaintenance ? 'WIZARD' : 'SAFETY');
-  const [isUnsafe, setIsUnsafe] = useState(false);
+  // FIX 1: Default view is ALWAYS 'WIZARD', remove Safety Check entirely
+  const [view, setView] = useState('WIZARD');
   const [overrideEmergency, setOverrideEmergency] = useState(false);
   const [step, setStep] = useState(1);
 
   const [formData, setFormData] = useState({
     category: initialCategory,
-    system: isInstall || isMaintenance ? [] : '',
-    issue: isMaintenance ? [] : '',
+    // FIX 2: Service 'issue' is now multi-select (array) like Install/Maint systems
+    system: [],
+    issue: [],
     issueLabel: '',
     name: '',
     phone: '',
@@ -374,14 +369,12 @@ export default function SmartQuote({ issueType, onBack }) {
     panelSize: '',
     priority: '',
     timeline: '',
-    // Service Fields
-    systemRunning: '',
-    whenStarted: '',
+    // Service/Maint Fields
     ownerOrTenant: '',
     preferredContact: '',
     bestTimeWindow: '',
     accessNotes: '',
-    // Maintenance Fields
+    // Maintenance Specific
     systemAgeApprox: '',
     lastServiceWhen: '',
     systemRunningNormally: '',
@@ -408,7 +401,15 @@ export default function SmartQuote({ issueType, onBack }) {
   }, [formData.installScenario, formData.system, isInstall]);
 
   // Dynamic Step Count
-  const TOTAL_STEPS = isInstall ? (isDetailsNeeded ? 6 : 5) : 6;
+  // Service: 1(Sys) -> 2(Issue Multi) -> 3(Property) -> 4(Contact)
+  // Install: 1(Sys) -> 2(Scenario) -> 3(Home) -> [4(Details)] -> [5(Prefs)] -> 6(Contact)
+  // Maint:   1(Sys) -> 2(Goals) -> 3(Context) -> 4(Home) -> 5(Prefs) -> 6(Contact)
+
+  const TOTAL_STEPS = useMemo(() => {
+    if (isInstall) return isDetailsNeeded ? 6 : 5;
+    if (isMaintenance) return 6;
+    return 4; // Service reduced to 4 steps
+  }, [isInstall, isMaintenance, isDetailsNeeded]);
 
   useEffect(() => {
     if (containerRef.current) {
@@ -424,7 +425,7 @@ export default function SmartQuote({ issueType, onBack }) {
   const currentIssues = useMemo(() => {
     if (isInstall) return [];
     if (isMaintenance) return ISSUE_OPTIONS.MAINTENANCE_GOALS;
-    return ISSUE_OPTIONS[formData.system] || ISSUE_OPTIONS.DEFAULT;
+    return ISSUE_OPTIONS[formData.system[0]] || ISSUE_OPTIONS.DEFAULT; // Use first selected system for issue defaults
   }, [formData.system, isInstall, isMaintenance]);
 
   // --- MAPPING LOGIC FOR STEP TITLES/SUBTITLES ---
@@ -449,12 +450,10 @@ export default function SmartQuote({ issueType, onBack }) {
       if (step === 5) return 'MAINT_PREFS';
       if (step === 6) return 'CONTACT';
     } else {
-      // SERVICE FLOW
-      if (step === 2) return 'ISSUE';
-      if (step === 3) return 'STATUS';
-      if (step === 4) return 'PROPERTY_CONTEXT';
-      if (step === 5) return 'ACCESS';
-      if (step === 6) return 'CONTACT';
+      // SERVICE FLOW (REFINED)
+      if (step === 2) return 'ISSUE'; // Multi-Select
+      if (step === 3) return 'PROPERTY_CONTEXT';
+      if (step === 4) return 'CONTACT'; // Includes Method Preference
     }
     return 'UNKNOWN';
   };
@@ -469,14 +468,12 @@ export default function SmartQuote({ issueType, onBack }) {
           : isInstall
             ? 'What do you need?'
             : 'Which system?';
+      // Service
       case 'ISSUE':
         return 'What seems to be the problem?';
-      case 'STATUS':
-        return 'System Status';
       case 'PROPERTY_CONTEXT':
         return 'Property Details';
-      case 'ACCESS':
-        return 'Access & Contact';
+      // Install
       case 'SCENARIO':
         return 'Current Setup';
       case 'HOME':
@@ -485,6 +482,7 @@ export default function SmartQuote({ issueType, onBack }) {
         return 'System Details';
       case 'PREFS':
         return 'Preferences';
+      // Maintenance
       case 'MAINT_GOALS':
         return 'Main Goal?';
       case 'MAINT_CONTEXT':
@@ -493,6 +491,7 @@ export default function SmartQuote({ issueType, onBack }) {
         return 'Home & Access';
       case 'MAINT_PREFS':
         return 'Preferences & Extras';
+
       case 'CONTACT':
         return 'Last Step';
       default:
@@ -503,17 +502,13 @@ export default function SmartQuote({ issueType, onBack }) {
   const getStepSubtitle = () => {
     switch (stepContent) {
       case 'SYSTEM':
-        return isInstall || isMaintenance
-          ? 'Select all that apply.'
-          : 'Select the equipment needing service.';
+        return 'Select all that apply.';
+      // Service
       case 'ISSUE':
-        return 'This helps us prepare the right parts.';
-      case 'STATUS':
-        return 'Help us understand the urgency.';
+        return 'Select all that apply.';
       case 'PROPERTY_CONTEXT':
         return 'So we know what to expect on arrival.';
-      case 'ACCESS':
-        return 'How should we reach you?';
+      // Install
       case 'SCENARIO':
         return 'Are we replacing or adding new?';
       case 'HOME':
@@ -522,6 +517,7 @@ export default function SmartQuote({ issueType, onBack }) {
         return 'Help us size it right (Optional).';
       case 'PREFS':
         return 'What matters most to you?';
+      // Maintenance
       case 'MAINT_GOALS':
         return 'What do you want to accomplish today?';
       case 'MAINT_CONTEXT':
@@ -530,6 +526,7 @@ export default function SmartQuote({ issueType, onBack }) {
         return 'Where is the equipment located?';
       case 'MAINT_PREFS':
         return 'Customize your appointment.';
+
       case 'CONTACT':
         return 'Where should we send the confirmation?';
       default:
@@ -541,6 +538,7 @@ export default function SmartQuote({ issueType, onBack }) {
     setFormData((prev) => ({ ...prev, [key]: value }));
   };
 
+  // Generic Toggle for Arrays (System, AddOns, Maint Goals, Service Issues)
   const toggleArrayItem = (key, id) => {
     setFormData((prev) => {
       const current = Array.isArray(prev[key]) ? prev[key] : [];
@@ -553,30 +551,37 @@ export default function SmartQuote({ issueType, onBack }) {
 
   // Validation Logic
   const validateStep = (currentStep, data) => {
+    // Step 1: System Required (All flows Multi)
     if (currentStep === 1) {
-      if ((isInstall || isMaintenance) && (!data.system || data.system.length === 0)) {
+      if (!data.system || data.system.length === 0) {
         alert('Please select at least one system.');
         return false;
       }
-      if (!isInstall && !isMaintenance && !data.system) return false;
     }
+
+    // Install Flow Validation
     if (isInstall) {
       if (currentStep === 2 && !data.installScenario) {
         alert('Please select a scenario.');
         return false;
       }
     }
-    if (isMaintenance) {
-      if (currentStep === 2 && (!data.issue || data.issue.length === 0)) {
-        alert('Please select at least one goal.');
+
+    // Service & Maintenance Flow: Step 2 Issue/Goal Required
+    if (!isInstall && currentStep === 2) {
+      if (!data.issue || data.issue.length === 0) {
+        alert('Please select at least one option.');
         return false;
       }
     }
+
     return true;
   };
 
   const handleNext = (key, value, extraLabel = '') => {
     let nextData = { ...formData };
+
+    // Direct set if key provided (mostly for single-select tiles)
     if (key && !Array.isArray(formData[key])) {
       nextData[key] = value;
       if (extraLabel) nextData.issueLabel = extraLabel;
@@ -593,21 +598,14 @@ export default function SmartQuote({ issueType, onBack }) {
   };
 
   const handleBack = () => {
-    if (isUnsafe) {
-      setIsUnsafe(false);
-      return;
-    }
     if (step > 1) {
       setStep((prev) => prev - 1);
     } else {
-      if (isInstall || isMaintenance) {
-        onBack();
-      } else {
-        setView('SAFETY');
-      }
+      onBack();
     }
   };
 
+  // --- CONDITIONAL LOGIC FOR INSTALL DETAILS ---
   const systems = Array.isArray(formData.system) ? formData.system : [formData.system];
   const hasGasSys = systems.some((s) =>
     ['FURNACE', 'BOILER', 'TANKLESS', 'TANK', 'FIREPLACE'].includes(s)
@@ -619,19 +617,9 @@ export default function SmartQuote({ issueType, onBack }) {
   const showElectricQuestion = formData.installScenario === 'NO_EXISTING_SYSTEM' && hasElecSys;
   const showDuctQuestion = hasDuctSys;
 
-  if (view === 'SAFETY') {
-    return (
-      <SafetyView
-        isUnsafe={isUnsafe}
-        setIsUnsafe={setIsUnsafe}
-        onSafe={() => setView('WIZARD')}
-        onBack={onBack}
-      />
-    );
-  }
-
   if (view === 'SUCCESS') {
-    const isNoHeat = formData.issue === 'NO_HEAT';
+    const isNoHeat = formData.issue.includes('NO_HEAT');
+    // Emergency logic only applies to Service flow
     if (isNoHeat && !overrideEmergency && !isInstall && !isMaintenance) {
       return (
         <EmergencyOutput
@@ -680,53 +668,48 @@ export default function SmartQuote({ issueType, onBack }) {
               <p className='text-rose-900/60 font-medium'>{getStepSubtitle()}</p>
             </div>
 
-            {/* 1. SYSTEM SELECTION (Shared) */}
+            {/* 1. SYSTEM SELECTION (Shared Multi-Select) */}
             {stepContent === 'SYSTEM' && (
               <div className='space-y-6'>
                 <div className='grid grid-cols-1 sm:grid-cols-2 gap-3'>
                   {currentSystems.map((opt) => {
-                    const isMulti = isInstall || isMaintenance;
-                    const isSelected = isMulti
-                      ? formData.system.includes(opt.id)
-                      : formData.system === opt.id;
                     return (
                       <SelectionTile
                         key={opt.id}
                         icon={opt.icon}
                         title={opt.label}
-                        selected={isSelected}
-                        onClick={() => {
-                          if (isMulti) {
-                            toggleArrayItem('system', opt.id);
-                          } else {
-                            handleNext('system', opt.id);
-                          }
-                        }}
+                        selected={formData.system.includes(opt.id)}
+                        onClick={() => toggleArrayItem('system', opt.id)}
                       />
                     );
                   })}
                 </div>
-                {(isInstall || isMaintenance) && (
-                  <ContinueButton
-                    onClick={() => handleNext()}
-                    disabled={formData.system.length === 0}
-                  />
-                )}
+                <ContinueButton
+                  onClick={() => handleNext()}
+                  disabled={formData.system.length === 0}
+                />
               </div>
             )}
 
-            {/* 2. SERVICE: ISSUE */}
+            {/* 2. SERVICE: ISSUE (Multi-Select) */}
             {stepContent === 'ISSUE' && (
-              <div className='grid grid-cols-1 sm:grid-cols-2 gap-3'>
-                {currentIssues.map((opt) => (
-                  <SelectionTile
-                    key={opt.id}
-                    title={opt.label}
-                    desc={opt.desc}
-                    icon={opt.icon}
-                    onClick={() => handleNext('issue', opt.id, opt.label)}
-                  />
-                ))}
+              <div className='space-y-6'>
+                <div className='grid grid-cols-1 sm:grid-cols-2 gap-3'>
+                  {currentIssues.map((opt) => (
+                    <SelectionTile
+                      key={opt.id}
+                      title={opt.label}
+                      desc={opt.desc}
+                      icon={opt.icon}
+                      selected={formData.issue.includes(opt.id)}
+                      onClick={() => toggleArrayItem('issue', opt.id)}
+                    />
+                  ))}
+                </div>
+                <ContinueButton
+                  onClick={() => handleNext()}
+                  disabled={formData.issue.length === 0}
+                />
               </div>
             )}
 
@@ -874,30 +857,7 @@ export default function SmartQuote({ issueType, onBack }) {
               </div>
             )}
 
-            {/* 3. SERVICE: STATUS */}
-            {stepContent === 'STATUS' && (
-              <div className='space-y-8'>
-                <TileGroup
-                  label='Is the system running?'
-                  options={RUNNING_STATUS}
-                  value={formData.systemRunning}
-                  onChange={(val) => updateField('systemRunning', val)}
-                  cols={3}
-                />
-                <TileGroup
-                  label='When did the issue start?'
-                  options={WHEN_STARTED}
-                  value={formData.whenStarted}
-                  onChange={(val) => updateField('whenStarted', val)}
-                />
-                <div className='space-y-2 pt-2'>
-                  <ContinueButton onClick={() => handleNext()} />
-                  <SkipButton onClick={() => handleNext()} />
-                </div>
-              </div>
-            )}
-
-            {/* 4. SERVICE: PROPERTY CONTEXT */}
+            {/* 3. SERVICE: PROPERTY CONTEXT */}
             {stepContent === 'PROPERTY_CONTEXT' && (
               <div className='space-y-8'>
                 <TileGroup
@@ -916,40 +876,6 @@ export default function SmartQuote({ issueType, onBack }) {
                   onChange={(val) => updateField('ownerOrTenant', val)}
                   cols={3}
                 />
-                <div className='space-y-2 pt-2'>
-                  <ContinueButton onClick={() => handleNext()} />
-                  <SkipButton onClick={() => handleNext()} />
-                </div>
-              </div>
-            )}
-
-            {/* 5. SERVICE: ACCESS */}
-            {stepContent === 'ACCESS' && (
-              <div className='space-y-8'>
-                <TileGroup
-                  label='Preferred Contact Method'
-                  options={CONTACT_METHOD}
-                  value={formData.preferredContact}
-                  onChange={(val) => updateField('preferredContact', val)}
-                  cols={3}
-                />
-                <TileGroup
-                  label='Best Time for Visit'
-                  options={TIME_WINDOW}
-                  value={formData.bestTimeWindow}
-                  onChange={(val) => updateField('bestTimeWindow', val)}
-                />
-                <div>
-                  <div className='text-xs font-bold text-rose-900/60 uppercase tracking-widest mb-3 ml-1'>
-                    Access Notes (Optional)
-                  </div>
-                  <textarea
-                    placeholder='Gate code, parking info, or side door access...'
-                    value={formData.accessNotes}
-                    onChange={(e) => updateField('accessNotes', e.target.value)}
-                    className='w-full p-4 rounded-2xl border border-rose-100 bg-white/50 focus:bg-white focus:ring-2 focus:ring-rose-500/20 outline-none transition-all text-sm min-h-[100px]'
-                  />
-                </div>
                 <div className='space-y-2 pt-2'>
                   <ContinueButton onClick={() => handleNext()} />
                   <SkipButton onClick={() => handleNext()} />
@@ -1280,6 +1206,29 @@ function ContactForm({ formData, setFormData, onSubmit }) {
         />
       </div>
 
+      {/* PREFERRED CONTACT METHOD - ADDED HERE */}
+      <div className='animate-in slide-in-from-bottom-2 duration-500'>
+        <div className='text-xs font-bold text-rose-900/60 uppercase tracking-widest mb-2 ml-1'>
+          Preferred Contact Method
+        </div>
+        <div className='grid grid-cols-3 gap-2'>
+          {CONTACT_METHOD.map((opt) => (
+            <button
+              key={opt.id}
+              type='button'
+              onClick={() => setFormData((prev) => ({ ...prev, preferredContact: opt.id }))}
+              className={`flex flex-col items-center justify-center p-2 rounded-xl border transition-all ${
+                formData.preferredContact === opt.id
+                  ? 'bg-rose-500 text-white border-rose-500 shadow-md'
+                  : 'bg-white border-rose-100 text-rose-900/80 hover:bg-rose-50'
+              }`}
+            >
+              <span className='text-xs font-bold'>{opt.label}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
       <button
         type='submit'
         className='w-full bg-rose-500 hover:bg-rose-600 text-white font-bold py-4 rounded-2xl shadow-lg shadow-rose-500/30 active:scale-[0.98] transition-all flex items-center justify-center gap-2 mt-2'
@@ -1440,10 +1389,13 @@ function BookingOutput({ contactData, onBack }) {
           }}
           prefill={{
             email: contactData.email,
-            firstName: contactData.name,
-            smsReminderNumber: contactData.phone,
+            name: contactData.name, // Pass Full Name
+            firstName: contactData.name.split(' ')[0], // Split First
+            lastName: contactData.name.split(' ').slice(1).join(' '), // Split Last
+            smsReminderNumber: contactData.phone, // Pass Phone for SMS
             customAnswers: {
               a1: contactData.address,
+              a2: contactData.phone, // Backup Custom Answer
             },
           }}
           onModalClose={() => setIsOpen(false)}
@@ -1451,96 +1403,6 @@ function BookingOutput({ contactData, onBack }) {
           rootElement={rootElement}
         />
       )}
-    </div>
-  );
-}
-
-function SafetyView({ isUnsafe, setIsUnsafe, onSafe, onBack }) {
-  if (isUnsafe) {
-    return (
-      <div className='w-full mx-auto animate-in fade-in zoom-in duration-300 max-w-2xl'>
-        <div className='bg-red-600 text-white rounded-[32px] p-8 md:p-12 shadow-2xl shadow-red-600/30 text-center relative overflow-hidden'>
-          <div className='absolute top-0 left-0 w-full h-full bg-[url("https://www.transparenttextures.com/patterns/diagmonds-light.png")] opacity-10 mix-blend-overlay pointer-events-none' />
-          <div className='relative z-10 flex flex-col items-center'>
-            <div className='w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mb-6 animate-pulse'>
-              <AlertTriangle className='w-10 h-10 text-white' />
-            </div>
-            <h2 className='text-3xl md:text-4xl font-bold mb-4'>Stop Immediately.</h2>
-            <p className='text-white/90 text-lg md:text-xl mb-8 leading-relaxed max-w-lg'>
-              Gas leaks and electrical sparks are life-threatening emergencies. Do not use this
-              form. Evacuate your home and call Enbridge now.
-            </p>
-            <a
-              href='tel:18667635427'
-              className='bg-white text-red-600 font-bold py-4 px-8 rounded-2xl text-lg hover:bg-red-50 transition-all w-full max-w-sm flex items-center justify-center gap-2 mb-4 shadow-lg'
-            >
-              <Phone className='w-5 h-5' /> Call 1-866-763-5427
-            </a>
-            <button
-              onClick={() => setIsUnsafe(false)}
-              className='text-white/70 hover:text-white text-sm font-semibold mt-4 underline decoration-white/30 transition-colors'
-            >
-              I made a mistake, it's safe.
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className='w-full mx-auto animate-in fade-in zoom-in duration-300 max-w-2xl'>
-      <div className='relative overflow-hidden bg-white/60 backdrop-blur-2xl border border-white/40 shadow-2xl shadow-rose-900/10 rounded-[32px] ring-1 ring-white/50'>
-        <div className='px-6 py-6 md:px-8 flex justify-between items-center'>
-          <button
-            type='button'
-            onClick={onBack}
-            className='group flex items-center gap-2 text-sm font-semibold text-rose-800/60 hover:text-rose-950 transition-colors px-3 py-1.5 rounded-full hover:bg-white/50'
-          >
-            <ChevronLeft className='w-4 h-4 group-hover:-translate-x-0.5 transition-transform' />
-            Home
-          </button>
-          <div className='text-xs font-bold text-rose-400 uppercase tracking-widest'>
-            Safety First
-          </div>
-        </div>
-        <div className='p-6 md:p-10 min-h-[400px] flex flex-col justify-center max-w-xl mx-auto w-full'>
-          <div className='animate-in slide-in-from-right-8 duration-500 space-y-8'>
-            <div className='text-center'>
-              <div className='inline-flex p-3 bg-amber-100 text-amber-600 rounded-full mb-4'>
-                <AlertTriangle className='w-6 h-6' />
-              </div>
-              <h2 className='text-3xl font-bold text-rose-950 mb-3'>Safety Check</h2>
-              <p className='text-rose-900/60 font-medium text-lg leading-relaxed max-w-md mx-auto'>
-                Before we start, do you smell gas (rotten eggs) or see electrical sparks?
-              </p>
-            </div>
-            <div className='grid gap-4 md:grid-cols-2'>
-              <SelectionTile
-                icon={<CheckCircle2 className='text-emerald-500' />}
-                title='No, it looks safe'
-                desc='Proceed to booking'
-                onClick={onSafe}
-                className='border-emerald-100 bg-emerald-50/50 hover:bg-emerald-100/80 hover:border-emerald-300'
-              />
-              <SelectionTile
-                icon={<AlertTriangle className='text-red-500' />}
-                title='Yes, I do'
-                desc='Potential Danger'
-                onClick={() => setIsUnsafe(true)}
-                className='border-red-100 bg-red-50/50 hover:bg-red-100/80 hover:border-red-300'
-              />
-            </div>
-            <div className='p-4 bg-rose-50 rounded-xl border border-rose-100 flex gap-3 items-start'>
-              <Phone className='w-4 h-4 text-rose-500 shrink-0 mt-0.5' />
-              <p className='text-xs text-rose-800/70 leading-relaxed'>
-                <strong>Note:</strong> If this is an emergency involving gas, call Enbridge Gas
-                immediately at 1-866-763-5427.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }

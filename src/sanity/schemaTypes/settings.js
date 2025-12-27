@@ -14,11 +14,20 @@ export const settings = defineType({
     }),
     defineField({
       name: 'logo',
-      title: 'Navigation Logo (Light Background)',
+      title: 'Desktop Logo',
+      description: 'The main logo displayed on large screens.',
       type: 'image',
       options: { hotspot: true },
     }),
-    // FIX: Added separate Footer Logo field
+    // NEW: Mobile Logo Field
+    defineField({
+      name: 'mobileLogo',
+      title: 'Mobile Logo',
+      description:
+        'Optional. A smaller/simplified logo for mobile screens (e.g., just the flame icon).',
+      type: 'image',
+      options: { hotspot: true },
+    }),
     defineField({
       name: 'footerLogo',
       title: 'Footer Logo (Dark Background)',

@@ -56,17 +56,20 @@ const SERVICES = [
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [logoData, setLogoData] = useState(null);
-  const [loading, setLoading] = useState(true); // <--- LOADING STATE
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchSettings = async () => {
       try {
-        const data = await client.fetch(`*[_id == "settings"][0]{ logo, companyName, _updatedAt }`);
+        // Updated Query to include mobileLogo
+        const data = await client.fetch(
+          `*[_id == "settings"][0]{ logo, mobileLogo, companyName, _updatedAt }`
+        );
         setLogoData(data);
       } catch (error) {
         console.error('Failed to fetch settings:', error);
       } finally {
-        setLoading(false); // <--- STOP LOADING
+        setLoading(false);
       }
     };
     fetchSettings();
@@ -76,24 +79,42 @@ export default function Navbar() {
     <nav className='sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-rose-100'>
       <div className='max-w-7xl mx-auto px-6'>
         <div className='flex justify-between items-center h-20'>
-          {/* 1. LOGO LOGIC - SKELETON & DIMENSIONS */}
+          {/* 1. LOGO LOGIC */}
           <Link href='/' className='flex items-center gap-2 group'>
             {loading ? (
               <div className='h-12 w-32 bg-slate-100 animate-pulse rounded-lg' />
             ) : logoData?.logo ? (
               <div className='relative flex items-center'>
-                <Image
-                  src={urlFor(logoData.logo).width(300).url()}
-                  alt={logoData.companyName || 'Company Logo'}
-                  width={160}
-                  height={48}
-                  priority
-                  className='object-contain object-left' // Removed w-auto/w-32
-                  style={{ width: '160px', height: 'auto' }} // Forces strict aspect ratio
-                />
+                {/* A. MOBILE LOGO (Shows on small screens if available) */}
+                {logoData.mobileLogo && (
+                  <div className='block md:hidden'>
+                    <Image
+                      src={urlFor(logoData.mobileLogo).width(160).url()}
+                      alt={logoData.companyName || 'Company Logo'}
+                      width={48}
+                      height={48}
+                      priority
+                      className='object-contain'
+                      style={{ width: 'auto', height: '40px' }}
+                    />
+                  </div>
+                )}
+
+                {/* B. DESKTOP LOGO (Hidden on small screens if mobile logo exists, otherwise shows always) */}
+                <div className={`${logoData.mobileLogo ? 'hidden md:block' : 'block'}`}>
+                  <Image
+                    src={urlFor(logoData.logo).width(300).url()}
+                    alt={logoData.companyName || 'Company Logo'}
+                    width={160}
+                    height={48}
+                    priority
+                    className='object-contain object-left'
+                    style={{ width: '160px', height: 'auto' }}
+                  />
+                </div>
               </div>
             ) : (
-              // B: Fallback (Only shows if no logo uploaded)
+              // C: Fallback (Only shows if no logo uploaded at all)
               <>
                 <div className='w-10 h-10 bg-rose-500 rounded-xl flex items-center justify-center text-white shadow-lg shadow-rose-500/20 group-hover:scale-105 transition-transform'>
                   <Flame size={24} fill='white' />

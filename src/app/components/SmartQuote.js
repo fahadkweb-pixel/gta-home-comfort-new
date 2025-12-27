@@ -42,7 +42,7 @@ import {
   Wrench,
   Dog,
   Sparkles,
-  Map, // Added for Postal Code icon
+  Map,
 } from 'lucide-react';
 import { PopupModal, useCalendlyEventListener } from 'react-calendly';
 import { createLead } from '../actions';
@@ -313,13 +313,18 @@ const LAST_SERVICE = [
   { id: '2+', label: '2+ Years Ago' },
   { id: 'Unsure', label: 'Never / Not Sure' },
 ];
+
+// --- UPDATED: ADDED OUTSIDE & WALL MOUNTED OPTIONS ---
 const ACCESS_LOCATION = [
   { id: 'Basement', label: 'Basement' },
-  { id: 'Utility', label: 'Utility Closet' },
-  { id: 'Attic', label: 'Attic' },
+  { id: 'Utility', label: 'Utility Room' },
+  { id: 'Outside', label: 'Outside (AC/HP)' },
+  { id: 'Wall', label: 'Wall (Ductless)' },
   { id: 'Garage', label: 'Garage' },
+  { id: 'Attic', label: 'Attic' },
   { id: 'Unsure', label: 'Not Sure' },
 ];
+
 const PETS_OPTIONS = [
   { id: 'Yes', label: 'Yes, I have pets', icon: <Dog /> },
   { id: 'No', label: 'No pets', icon: <Ban /> },
@@ -357,7 +362,7 @@ export default function SmartQuote({ issueType, onBack }) {
     phone: '',
     email: '',
     address: '',
-    postalCode: '', // NEW FIELD
+    postalCode: '', // Postal Code Field
     bot_field: '',
     installScenario: '',
     propertyType: '',
@@ -571,7 +576,6 @@ export default function SmartQuote({ issueType, onBack }) {
     }
   };
 
-  // --- CONDITIONAL LOGIC FOR INSTALL DETAILS ---
   const systems = Array.isArray(formData.system) ? formData.system : [formData.system];
   const hasGasSys = systems.some((s) =>
     ['FURNACE', 'BOILER', 'TANKLESS', 'TANK', 'FIREPLACE'].includes(s)
@@ -769,7 +773,7 @@ export default function SmartQuote({ issueType, onBack }) {
               </div>
             )}
 
-            {/* 3. SERVICE: PROPERTY CONTEXT (UPDATED TITLE & CONTENT) */}
+            {/* 3. SERVICE: PROPERTY CONTEXT */}
             {stepContent === 'PROPERTY_CONTEXT' && (
               <div className='space-y-8'>
                 <TileGroup
@@ -802,7 +806,7 @@ export default function SmartQuote({ issueType, onBack }) {
               </div>
             )}
 
-            {/* 3. INSTALL: HOME & LAYOUT (UPDATED) */}
+            {/* 3. INSTALL: HOME & LAYOUT */}
             {stepContent === 'HOME' && (
               <div className='space-y-8'>
                 <TileGroup
